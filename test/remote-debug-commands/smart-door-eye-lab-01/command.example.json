@@ -1,0 +1,7 @@
+{
+  "id": "20260502-001",
+  "action": "flash_main",
+  "firmware": "release/smart-door-eye-remote-debug-20260502/firmware/main_xiao_esp32c6/smartdooreye.ino.merged.bin",
+  "port": "COM5",
+  "erase": true
+}

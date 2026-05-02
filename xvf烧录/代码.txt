@@ -1,0 +1,4 @@
+dfu-util -d 2886:001a -a 1 -D "C:\Users\dengw\practice\综合工程实践期末\reSpeaker_XVF3800_USB_4MIC_ARRAY-master\xmos_firmwares\i2s\respeaker_xvf3800_i2s_dfu_firmware_v1.0.7.bin" -R    
+https://blog.csdn.net/D777777777777/article/details/157465560
+https://github.com/respeaker/reSpeaker_XVF3800_USB_4MIC_ARRAY#
+https://wiki.seeedstudio.com/cn/respeaker_xvf3800_xiao_record_playback/#%e4%bb%a3%e7%a0%81%e6%a6%82%e8%bf%b0

@@ -1,0 +1,9 @@
+{
+  "enabled": true,
+  "repoRoot": "",
+  "testLogDir": "test/remote-debug-logs",
+  "deviceId": "smart-door-eye-lab-01",
+  "autoCommit": true,
+  "autoPush": true,
+  "commitMessagePrefix": "Add remote debug log"
+}

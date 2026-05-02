@@ -1,0 +1,18 @@
+# Local Arduino toolchains and build caches are reproducible and very large.
+/tools/
+
+# Generated zip packages are release artifacts, not the source of truth.
+/release/*.zip
+
+# Superseded student package; the bootstrap package is the current student entry point.
+/release/smart-door-eye-student-minimal-20260502/
+
+# Prepared local split repositories and local bare remotes.
+/git_prepared/
+/_remotes/
+
+# OS/editor noise.
+.DS_Store
+Thumbs.db
+*.tmp
+*.bak

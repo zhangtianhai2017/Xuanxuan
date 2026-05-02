@@ -1,0 +1,18 @@
+{
+  "deviceId": "smart-door-eye-lab-01",
+  "repoRoot": "",
+  "xiaoPort": "COM5",
+  "camPort": "",
+  "xiaoBaud": 115200,
+  "logDir": "test/remote-debug-logs",
+  "commandDir": "test/remote-debug-commands",
+  "logPushIntervalSeconds": 60,
+  "commandPollIntervalSeconds": 20,
+  "autoPush": true,
+  "allowFlashMain": true,
+  "allowFlashXvfTest": true,
+  "allowFlashCam": false,
+  "defaultMainFirmware": "release/smart-door-eye-remote-debug-20260502/firmware/main_xiao_esp32c6/smartdooreye.ino.merged.bin",
+  "defaultXvfTestFirmware": "release/smart-door-eye-remote-debug-20260502/firmware/xvf_i2s_test_xiao_esp32c6/sketch_apr18a.ino.merged.bin",
+  "defaultCamFirmware": "release/smart-door-eye-remote-debug-20260502/firmware/cam_ai_thinker_esp32cam/CameraWebServer.ino.merged.bin"
+}

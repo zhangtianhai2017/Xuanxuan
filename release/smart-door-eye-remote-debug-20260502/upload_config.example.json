@@ -1,0 +1,9 @@
+{
+  "enabled": false,
+  "url": "http://YOUR_SERVER_IP:8088/upload",
+  "deviceId": "smart-door-eye-lab-01",
+  "authHeaderName": "",
+  "authHeaderValue": "",
+  "uploadEverySeconds": 0,
+  "uploadAtEnd": true
+}

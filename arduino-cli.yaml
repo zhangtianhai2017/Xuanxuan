@@ -1,0 +1,9 @@
+directories:
+  data: F:\work\2026\codex\XuanXuan\tools\arduino-data
+  downloads: F:\work\2026\codex\XuanXuan\tools\arduino-downloads
+  user: F:\work\2026\codex\XuanXuan\tools\arduino-user
+board_manager:
+  additional_urls:
+    - https://espressif.github.io/arduino-esp32/package_esp32_index.json
+library:
+  enable_unsafe_install: false
