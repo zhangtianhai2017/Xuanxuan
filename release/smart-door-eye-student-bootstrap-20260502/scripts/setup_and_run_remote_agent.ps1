@@ -101,7 +101,7 @@ if (Test-Path (Join-Path $repoRoot ".git")) {
   Invoke-Git -GitArgs @("-C", $repoRoot, "pull", "--rebase", "--autostash") -FailureMessage "git pull failed"
 } else {
   if ($repoUrlNeedsTeacher) {
-    throw "This package has not been prepared with a project Git URL. Please contact the teacher/debug maintainer."
+    throw "This bootstrap package is not ready: repoUrl is still a placeholder. The maintainer must fill the student remote-debug Git URL before sending this package."
   }
   Write-Step "Cloning project Git repository"
   $parent = Split-Path $repoRoot -Parent

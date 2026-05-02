@@ -3,6 +3,8 @@
 
 # Generated zip packages are release artifacts, not the source of truth.
 /release/*.zip
+/*.zip
+/*.rar
 
 # Superseded student package; the bootstrap package is the current student entry point.
 /release/smart-door-eye-student-minimal-20260502/
