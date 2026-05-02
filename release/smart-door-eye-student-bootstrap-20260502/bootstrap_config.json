@@ -1,5 +1,5 @@
 {
-  "repoUrl": "REPO_URL_FILLED_BY_TEACHER_BEFORE_SEND",
+  "repoUrl": "https://github.com/zhangtianhai2017/Xuanxuan.git",
   "repoRoot": "%USERPROFILE%\\Documents\\XuanXuan-smart-door-eye",
   "deviceId": "smart-door-eye-lab-01",
   "xiaoPort": "COM5",
