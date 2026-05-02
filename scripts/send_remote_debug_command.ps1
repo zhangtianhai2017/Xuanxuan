@@ -26,7 +26,7 @@ Set-Location $RepoRoot
 Invoke-GitChecked -GitArgs @("pull", "--rebase", "--autostash") -Message "git pull failed"
 
 if ($Action -eq "flash_cam" -and -not $AllowCam) {
-  throw "flash_cam needs现场 GPIO0/EN 下载模式配合。确认现场已准备好后，加 -AllowCam 再执行。"
+  throw "flash_cam is disabled by default because ESP32-CAM usually needs onsite GPIO0/EN bootloader wiring. Re-run with -AllowCam only after onsite preparation."
 }
 
 if ([string]::IsNullOrWhiteSpace($Firmware)) {
