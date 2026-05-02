@@ -1,10 +1,10 @@
-﻿A052AC41E8356233EE393887D31815F63B8B72801FD9512618E9FA15EE90FDDC  .\release\smart-door-eye-remote-debug-20260502\firmware\cam_ai_thinker_esp32cam\CameraWebServer.ino.bin
+A052AC41E8356233EE393887D31815F63B8B72801FD9512618E9FA15EE90FDDC  .\release\smart-door-eye-remote-debug-20260502\firmware\cam_ai_thinker_esp32cam\CameraWebServer.ino.bin
 1191EB3D913873C709C2FA100F829F4B824971000C0B8831B33F05F98BE3282A  .\release\smart-door-eye-remote-debug-20260502\firmware\cam_ai_thinker_esp32cam\CameraWebServer.ino.bootloader.bin
 0ECE7343899BE582D70D9B86A47AB955D01E731A1582EB90A8F5E4C646BACD59  .\release\smart-door-eye-remote-debug-20260502\firmware\cam_ai_thinker_esp32cam\CameraWebServer.ino.merged.bin
 AAAE2888C5A6A348004B5B436F47ABB25AE32E72D9003902955A998EDA723EDD  .\release\smart-door-eye-remote-debug-20260502\firmware\cam_ai_thinker_esp32cam\CameraWebServer.ino.partitions.bin
-22C926DBB6D4E9988CAC4AD8267ED583C4ECFE69BC753E6CB4555EB2CB342ED5  .\release\smart-door-eye-remote-debug-20260502\firmware\main_xiao_esp32c6\smartdooreye.ino.bin
+6EB5EAF296E8F7B76C8BC56E5223FAF80758EB20D73D1492D27B37B0F2CE0F47  .\release\smart-door-eye-remote-debug-20260502\firmware\main_xiao_esp32c6\smartdooreye.ino.bin
 517CB594DA4C38C3E376976951462C2BD7991A60BC16E43E08D29491368EB0BE  .\release\smart-door-eye-remote-debug-20260502\firmware\main_xiao_esp32c6\smartdooreye.ino.bootloader.bin
-74BCAD2AB9C1052CB60726B529E47D938E260E73660F70DFD93ADF6806F16BF3  .\release\smart-door-eye-remote-debug-20260502\firmware\main_xiao_esp32c6\smartdooreye.ino.merged.bin
+E4EB71B378338B89153614D3F54334DC19A3A0368B0331DB2230467376CF52AF  .\release\smart-door-eye-remote-debug-20260502\firmware\main_xiao_esp32c6\smartdooreye.ino.merged.bin
 AAAE2888C5A6A348004B5B436F47ABB25AE32E72D9003902955A998EDA723EDD  .\release\smart-door-eye-remote-debug-20260502\firmware\main_xiao_esp32c6\smartdooreye.ino.partitions.bin
 3CBDE3558E6AD770EAB9D5C1A828374EB2AE7D2EDE47122828F9C5E6F47E538E  .\release\smart-door-eye-remote-debug-20260502\firmware\xvf_i2s_test_xiao_esp32c6\sketch_apr18a.ino.bin
 D8499F4367C3A8377D513A2FD0E94B5AD6974D2C13591B52BAD56183AA7002E7  .\release\smart-door-eye-remote-debug-20260502\firmware\xvf_i2s_test_xiao_esp32c6\sketch_apr18a.ino.bootloader.bin
@@ -12,7 +12,7 @@ D8499F4367C3A8377D513A2FD0E94B5AD6974D2C13591B52BAD56183AA7002E7  .\release\smar
 148B959CBFF1C38AA8E1D5C0BA9D612C54997B945E56A63F41223EEF650653A1  .\release\smart-door-eye-remote-debug-20260502\firmware\xvf_i2s_test_xiao_esp32c6\sketch_apr18a.ino.partitions.bin
 10EB19781C9ACDDB9B6946DD9D7B8BFD37F42341936C9F9BAFB0D6B02C74CE4C  .\release\smart-door-eye-remote-debug-20260502\git_upload_config.example.json
 BE2702098C14166B2FCF964CFEBC231BBC08D59B4FDCC10F5121B043E08A7286  .\release\smart-door-eye-remote-debug-20260502\git_upload_config.json
-77BAD218EAD281DD7A0C85AB0E9FB3C641DC380EA5DF76BE1D18DE4396424396  .\release\smart-door-eye-remote-debug-20260502\README_远程调试指南.md
+77BAD218EAD281DD7A0C85AB0E9FB3C641DC380EA5DF76BE1D18DE4396424396  .\release\smart-door-eye-remote-debug-20260502\README_??????.md
 DF52F3246BDFAA381990BA8228AE57B0A99889BFCB20EF4D9853CCAD828743D8  .\release\smart-door-eye-remote-debug-20260502\remote_agent_config.example.json
 4F997EF0B3352C2CE02CE458D83B4E9A13931B38FA2102235627736CE1E6180B  .\release\smart-door-eye-remote-debug-20260502\remote_agent_config.json
 B190CD3C8EFB6D17CFB0227B0F34C2EFAE7EB2CDC557C1201566D0A52F808ECA  .\release\smart-door-eye-remote-debug-20260502\scripts\capture_cam_usbttl_log.cmd
@@ -30,4 +30,4 @@ FB3268C4E6C4BFC3027B77FDDE46937E33EADC8F386228FE923815F22FD2FF5D  .\release\smar
 189B1AF95D661151E054CEA10C91B3D754E4DE4D3FECFB074C1FB29476F7167B  .\release\smart-door-eye-remote-debug-20260502\tools\esptool\LICENSE
 BDF94BDBB525676E6216EF64A5F5EDBED3C3F49CC1DCDF0AFF0C64B822475CE7  .\release\smart-door-eye-remote-debug-20260502\tools\esptool\README.md
 DD48B3B91B40C7783A7E342A1FA61F365F07D0A5253561C6CDA2E1F45707E977  .\release\smart-door-eye-remote-debug-20260502\upload_config.example.json
-5D1776A27D0C040A84E2065CA962CF71F6B25568E18BE7728B1B50E153F64B98  .\release\smart-door-eye-remote-debug-20260502\现场记录表_请填写.md
+5D1776A27D0C040A84E2065CA962CF71F6B25568E18BE7728B1B50E153F64B98  .\release\smart-door-eye-remote-debug-20260502\?????_???.md

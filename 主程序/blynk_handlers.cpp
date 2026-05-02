@@ -8,6 +8,7 @@
 */
 
 #include "blynk_handlers.h"
+#include "camera_comm.h"
 #include "debug_log.h"
 #include <BlynkSimpleEsp32.h>
 
@@ -57,7 +58,6 @@ BLYNK_WRITE(VPIN_REMOTE_CAPTURE) {
     // 手机端按下“远程拍照”按钮后，会执行和门铃拍照相同的流程。
     if (param.asInt() == 1) {
         logInfo("BLYNK", "REMOTE_CAPTURE_REQUEST");
-        extern void takePhotoAndProcess(int);
         takePhotoAndProcess(0);
     }
 }

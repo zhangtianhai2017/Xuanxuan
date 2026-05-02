@@ -88,6 +88,7 @@ void setupWiFi() {
     // 主控联网用于百度云 AI、Blynk 和网络 MP3。
     // 这里设置超时：即使实验室 WiFi 不可用，门铃/PIR/串口拍照也能继续测试。
     logInfo("WIFI", "CONNECT_START", String("ssid=") + ssid + " timeout_ms=" + WIFI_CONNECT_TIMEOUT);
+    WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
 
     unsigned long wifiStart = millis();
@@ -107,14 +108,34 @@ void handleWiFiReconnect() {
     // 如果开机时没连上 WiFi，系统每隔一段时间重试一次。
     // 这比在 setup() 里无限等待更适合教学和调试。
     static unsigned long lastReconnectAttempt = 0;
+    static unsigned long reconnectStart = 0;
+    static bool reconnectInProgress = false;
+
     if (WiFi.status() == WL_CONNECTED) {
+        if (reconnectInProgress) {
+            logInfo("WIFI", "RECONNECT_OK", String("ip=") + WiFi.localIP().toString());
+        }
+        reconnectInProgress = false;
         return;
+    }
+
+    if (reconnectInProgress) {
+        if (millis() - reconnectStart < WIFI_CONNECT_TIMEOUT) {
+            // WiFi.begin() 是异步的。连接还在进行时不要反复 begin()，
+            // 否则 ESP-IDF 会打印 "sta is connecting, cannot set config"。
+            return;
+        }
+        reconnectInProgress = false;
+        logWarn("WIFI", "RECONNECT_TIMEOUT", String("status=") + WiFi.status());
     }
 
     if (millis() - lastReconnectAttempt >= WIFI_RECONNECT_INTERVAL) {
         lastReconnectAttempt = millis();
-        logInfo("WIFI", "RECONNECT_START");
+        reconnectStart = millis();
+        reconnectInProgress = true;
+        logInfo("WIFI", "RECONNECT_START", String("status=") + WiFi.status());
         WiFi.disconnect();
+        delay(50);
         WiFi.begin(ssid, password);
     }
 }
@@ -178,8 +199,14 @@ void handlePIR() {
             playRandomQuarrelSequence(3);
             // 连续拍 3 张：每一张都会走 takePhotoAndProcess()，
             // 即拍照 -> Base64 -> 百度人脸识别。
+            bool registeredNewFaceThisEvent = false;
             for (int i = 0; i < 3; i++) {
-                takePhotoAndProcess(i);
+                // 同一次 PIR 逗留事件里，后续照片仍然会搜索熟人和统计访问，
+                // 但如果前面已经注册过新人，就不再注册第二个新人。
+                FaceProcessResult result = takePhotoAndProcess(i, !registeredNewFaceThisEvent);
+                if (result == FACE_PROCESS_REGISTERED) {
+                    registeredNewFaceThisEvent = true;
+                }
                 audioLoop();
                 delay(500);
             }

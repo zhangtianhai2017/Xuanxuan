@@ -38,6 +38,13 @@ enum FaceSearchResult {
   SEARCH_FAILED
 };
 
+enum FaceProcessResult {
+  FACE_PROCESS_MATCHED,
+  FACE_PROCESS_REGISTERED,
+  FACE_PROCESS_NO_FACE,
+  FACE_PROCESS_SKIPPED
+};
+
 String getBaiduAccessToken();
 String detectGender(const String& base64Image);
 FaceSearchResult faceSearch(const String& base64Image, String& matchedUserId);
@@ -46,6 +53,6 @@ int getStrangeCount(const String& user_id);
 int incrementStrangeCount(const String& user_id);
 void loadCounters();
 void saveCounters();
-void handleFaceRecognition(const String& base64Image);
+FaceProcessResult handleFaceRecognition(const String& base64Image, bool allowNewRegistration = true);
 
 #endif

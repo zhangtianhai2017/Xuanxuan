@@ -67,6 +67,10 @@ extern const char* baidu_secret_key;
 #define CAMERA_MOCK_IMAGE_ON_FAILURE        true
 #define CAMERA_FAILURE_BACKOFF_THRESHOLD    1
 #define CAMERA_FAILURE_BACKOFF_MS           60000UL
+// 远程调试阶段宁可拒绝可疑图片，也不要把坏 JPEG 当成有效访客照片上传。
+// SOI/EOI 是 JPEG 文件头尾标记；DONE 是 CAM 串口协议的结束行。
+#define CAMERA_REQUIRE_JPEG_MARKERS         true
+#define CAMERA_REQUIRE_DONE                 true
 
 // Blynk 虚拟引脚：手机端按钮/通知控件会和这些编号对应。
 #define VPIN_REMOTE_CAPTURE  1

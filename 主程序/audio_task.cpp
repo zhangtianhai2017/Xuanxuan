@@ -39,6 +39,11 @@ static unsigned long lastAudioDataTime = 0;
 static int pendingQuarrelTracks = 0;
 static int quarrelSequence[3] = {0, 1, 2};
 static int nextQuarrelSequenceIndex = 0;
+static const char* pendingAudioUrl = nullptr;
+static bool pendingAudioIsQuarrel = false;
+static bool pendingAudioIsDoorbell = false;
+
+static bool startNextQueuedQuarrelTrack();
 
 const char* quarrel_urls[] = {
     "https://raw.githubusercontent.com/toffee33/doorbell-noise-audio/main/noises%20quarrel/20260411_230758.mp3",
@@ -63,6 +68,16 @@ static void stopCurrentAudio() {
     lastAudioDataTime = 0;
     isPlayingQuarrel = false;
     isPlayingDoorbell = false;
+}
+
+static bool queueAudioFromUrl(const char* url, bool isQuarrel, bool isDoorbell) {
+    // 事件处理函数只负责“提出播放请求”，真正打开网络流放到 audioLoop()。
+    // 这样 PIR/门铃可以先继续执行拍照流程，不会被 GitHub/raw 网络连接卡住数秒。
+    pendingAudioUrl = url;
+    pendingAudioIsQuarrel = isQuarrel;
+    pendingAudioIsDoorbell = isDoorbell;
+    logInfo("AUDIO", "PLAY_QUEUED", String("url=") + url);
+    return true;
 }
 
 static bool startAudioFromUrl(const char* url) {
@@ -95,18 +110,53 @@ static bool startAudioFromUrl(const char* url) {
     return true;
 }
 
+static void handleQueuedAudioStartFailure() {
+    // 如果一首吵架音因为 WiFi/网络失败没有启动，继续尝试队列里的下一首。
+    // 这保证 PIR 的“三首随机音”需求在网络抖动时尽量向前推进。
+    if (pendingAudioIsQuarrel && pendingQuarrelTracks > 0) {
+        pendingQuarrelTracks--;
+        logWarn("AUDIO", "QUEUE_ADVANCE_AFTER_START_FAIL", String("pending_before=") + (pendingQuarrelTracks + 1));
+        pendingAudioUrl = nullptr;
+        if (!startNextQueuedQuarrelTrack()) {
+            pendingQuarrelTracks = 0;
+            logError("AUDIO", "QUEUE_ADVANCE_FAILED");
+        }
+        return;
+    }
+
+    pendingAudioUrl = nullptr;
+    pendingQuarrelTracks = 0;
+}
+
+static bool startPendingAudioIfNeeded() {
+    if (pendingAudioUrl == nullptr) {
+        return false;
+    }
+
+    const char* url = pendingAudioUrl;
+    bool wasQuarrel = pendingAudioIsQuarrel;
+    bool wasDoorbell = pendingAudioIsDoorbell;
+    pendingAudioUrl = nullptr;
+
+    if (startAudioFromUrl(url)) {
+        isPlayingQuarrel = wasQuarrel;
+        isPlayingDoorbell = wasDoorbell;
+        return true;
+    }
+
+    pendingAudioIsQuarrel = wasQuarrel;
+    pendingAudioIsDoorbell = wasDoorbell;
+    handleQueuedAudioStartFailure();
+    return false;
+}
+
 static bool startQuarrelTrackByIndex(int index) {
     // index 是吵架音数组下标。先做边界检查，防止数组越界。
     if (index < 0 || index >= quarrel_count) {
         return false;
     }
 
-    if (startAudioFromUrl(quarrel_urls[index])) {
-        isPlayingQuarrel = true;
-        isPlayingDoorbell = false;
-        return true;
-    }
-    return false;
+    return queueAudioFromUrl(quarrel_urls[index], true, false);
 }
 
 static bool startNextRandomQuarrelTrack() {
@@ -128,6 +178,7 @@ void audioLoop() {
     // 这个函数必须在主 loop() 中频繁调用。
     // 每次只复制一小块音频数据，避免播放音频时系统无法响应按键/PIR。
     if (!audioActive) {
+        startPendingAudioIfNeeded();
         return;
     }
 
@@ -150,6 +201,7 @@ void audioLoop() {
         logInfo("AUDIO", playbackEnded ? "TRACK_ENDED" : "TRACK_START_TIMEOUT",
                 String("idle_ms=") + idleTime + " pending_before=" + pendingQuarrelTracks);
         pendingQuarrelTracks--;
+        stopCurrentAudio();
         if (!startNextQueuedQuarrelTrack()) {
             pendingQuarrelTracks = 0;
             logError("AUDIO", "QUEUE_ADVANCE_FAILED");
@@ -163,13 +215,15 @@ void audioLoop() {
 
 void stopAudio() {
     pendingQuarrelTracks = 0;
+    pendingAudioUrl = nullptr;
     logInfo("AUDIO", "STOP");
     stopCurrentAudio();
 }
 
 void playAudioFromUrl(const char* url) {
     pendingQuarrelTracks = 0;
-    startAudioFromUrl(url);
+    stopCurrentAudio();
+    queueAudioFromUrl(url, false, false);
 }
 
 void playRandomQuarrel() {
@@ -216,8 +270,6 @@ void playDoorbell() {
     // 播放门铃会取消正在排队的吵架音，避免两种场景的声音混在一起。
     pendingQuarrelTracks = 0;
     logInfo("AUDIO", "DOORBELL_REQUEST");
-    if (startAudioFromUrl(doorbell_url)) {
-        isPlayingDoorbell = true;
-        isPlayingQuarrel = false;
-    }
+    stopCurrentAudio();
+    queueAudioFromUrl(doorbell_url, false, true);
 }

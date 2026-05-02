@@ -14,6 +14,7 @@
 #define CAMERA_COMM_H
 
 #include "config.h"
+#include "face_recognition.h"
 
 #define CMD_CAPTURE     "CAPTURE\r\n"
 #define RESP_OK         "OK\r\n"
@@ -21,7 +22,7 @@
 #define RESP_ERROR      "ERROR\r\n"
 
 bool takePhoto(byte** imageBuffer, size_t* imageSize);
-void takePhotoAndProcess(int photoIndex);
+FaceProcessResult takePhotoAndProcess(int photoIndex, bool allowNewRegistration = true);
 bool sendCommand(const char* cmd, const char* expectedResponse, unsigned long timeout);
 bool receiveImageData(byte** buffer, size_t* size, unsigned long timeout);
 void pollCameraLogs();

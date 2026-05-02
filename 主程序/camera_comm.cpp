@@ -409,8 +409,22 @@ bool receiveImageData(byte** buffer, size_t* size, unsigned long timeout) {
             + " soi=" + (hasSoi ? 1 : 0)
             + " eoi=" + (hasEoi ? 1 : 0));
 
-    // 图片完整收到后再等 DONE。为了提高容错性，如果 DONE 丢失但图片完整，
-    // 当前实现仍接受图片，方便学生先验证主链路。
+    if (CAMERA_REQUIRE_JPEG_MARKERS && (!hasSoi || !hasEoi)) {
+        // SOI/EOI 缺失说明收到的不是完整 JPEG。远程调试时这类数据最容易误导判断，
+        // 所以直接失败，不继续 Base64，也不上传百度。
+        cameraBinaryTransferActive = false;
+        logError("CAM", "IMAGE_MARKER_INVALID",
+                 String("soi=") + (hasSoi ? 1 : 0) + " eoi=" + (hasEoi ? 1 : 0)
+                 + " bytes=" + len + " action=reject");
+        delete[] *buffer;
+        *buffer = nullptr;
+        *size = 0;
+        flushSerial1();
+        return false;
+    }
+
+    // 图片完整收到后再等 DONE。DONE 是本项目自定义串口协议的结束线。
+    // 如果 DONE 丢失，说明 CAM 或串口链路仍不稳定；调试阶段默认拒绝。
     String response = "";
     unsigned long doneWaitStart = millis();
     while (millis() - doneWaitStart < 2000) {
@@ -429,6 +443,17 @@ bool receiveImageData(byte** buffer, size_t* size, unsigned long timeout) {
     }
 
     cameraBinaryTransferActive = false;
+    if (CAMERA_REQUIRE_DONE) {
+        logError("CAM", "DONE_MISSING",
+                 String("wait_ms=") + (millis() - doneWaitStart) + " partial_response_chars=" + response.length()
+                 + " action=reject_complete_image");
+        delete[] *buffer;
+        *buffer = nullptr;
+        *size = 0;
+        flushSerial1();
+        return false;
+    }
+
     logWarn("CAM", "DONE_MISSING",
             String("wait_ms=") + (millis() - doneWaitStart) + " partial_response_chars=" + response.length()
             + " action=accept_complete_image");
@@ -534,7 +559,7 @@ bool takePhoto(byte** imageBuffer, size_t* imageSize) {
     return provideMockImage(imageBuffer, imageSize, "real_camera_capture_failed");
 }
 
-void takePhotoAndProcess(int photoIndex) {
+FaceProcessResult takePhotoAndProcess(int photoIndex, bool allowNewRegistration) {
     // 这是“拍照并上传识别”的一站式函数：
     // 门铃和 PIR 都调用它，保证两类照片走同一套百度识别流程。
     byte* imageBuffer = nullptr;
@@ -548,11 +573,12 @@ void takePhotoAndProcess(int photoIndex) {
 
         if (base64Image.length() > 0) {
             logInfo("PHOTO", "BASE64_OK", String("index=") + photoIndex + " chars=" + base64Image.length());
-            handleFaceRecognition(base64Image);
+            return handleFaceRecognition(base64Image, allowNewRegistration);
         } else {
             logError("PHOTO", "BASE64_FAILED", String("index=") + photoIndex);
         }
     } else {
         logError("PHOTO", "CAPTURE_FAILED", String("index=") + photoIndex);
     }
+    return FACE_PROCESS_SKIPPED;
 }

@@ -331,34 +331,43 @@ void saveCounters() {
   logInfo("FACE", "COUNTERS_SAVED", String("man=") + manCount + " woman=" + womanCount + " unknown=" + unknownCount);
 }
 
-void handleFaceRecognition(const String& base64Image) {
+FaceProcessResult handleFaceRecognition(const String& base64Image, bool allowNewRegistration) {
   // 所有图片上传识别都从这里进入：
   // 门铃抓拍、PIR 三连拍、Blynk 远程拍照都会复用同一流程。
+  // allowNewRegistration 用来保护 PIR 一次事件：三张照片都能搜索/统计，
+  // 但同一次逗留事件最多只允许注册一个新访客，避免 unknown1/unknown2 连号膨胀。
   String user_id;
   FaceSearchResult searchResult = faceSearch(base64Image, user_id);
 
   if (searchResult == SEARCH_MATCHED) {
     int newCount = incrementStrangeCount(user_id);
     logInfo("FACE", "KNOWN_VISIT", String("user_id=") + user_id + " count=" + newCount);
-    return;
+    return FACE_PROCESS_MATCHED;
   }
 
   if (searchResult == SEARCH_FAILED) {
     logWarn("FACE", "REGISTER_SKIP", "reason=search_failed");
-    return;
+    return FACE_PROCESS_SKIPPED;
+  }
+
+  if (!allowNewRegistration) {
+    logWarn("FACE", "REGISTER_SKIP", "reason=event_already_registered");
+    return FACE_PROCESS_SKIPPED;
   }
 
   String gender = detectGender(base64Image);
   if (gender.length() == 0) {
     logWarn("FACE", "REGISTER_SKIP", "reason=no_face_detected");
-    return;
+    return FACE_PROCESS_NO_FACE;
   }
 
   String new_user_id = registerNewFace(base64Image, gender);
   if (new_user_id.length() > 0) {
     int newCount = incrementStrangeCount(new_user_id);
     logInfo("FACE", "NEW_VISIT", String("user_id=") + new_user_id + " gender=" + gender + " count=" + newCount);
+    return FACE_PROCESS_REGISTERED;
   } else {
     logWarn("FACE", "NEW_VISIT_SKIPPED");
+    return FACE_PROCESS_SKIPPED;
   }
 }
