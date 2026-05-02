@@ -499,9 +499,12 @@ Write-Host "Press Ctrl+C to stop."
 Write-Host ""
 
 Write-AgentLog "agent_start deviceId=$DeviceId repoRoot=$RepoRoot xiaoPort=$script:XiaoPort autoDetectXiaoPort=$($Config.autoDetectXiaoPort -ne $false)"
-while (-not (Open-XiaoSerial -Retries 1)) {
-  Write-Host "Waiting for XIAO serial port $script:XiaoPort ..."
-  Start-Sleep -Seconds 5
+if (-not (Open-XiaoSerial -Retries 1)) {
+  # 不在启动阶段死等串口。远程调试最怕现场 USB 暂时断开后，
+  # Agent 也停止拉取命令和上传日志。主循环会继续定期重试串口，
+  # 同时保持 Git 同步，让我们仍能看到“现在没有 COM 口”这个事实。
+  Write-Host "XIAO serial is not open yet; the agent will keep syncing Git and retrying."
+  Write-AgentLog "serial_initial_open_pending port=$script:XiaoPort"
 }
 
 $nextPushAt = (Get-Date).AddSeconds($LogPushInterval)
