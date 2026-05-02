@@ -1,6 +1,6 @@
 ﻿{
-    "id":  "20260502-193919-flash_main",
+    "id":  "20260502-194241-flash_main",
     "action":  "flash_main",
     "firmware":  "release/smart-door-eye-remote-debug-20260502/firmware/main_xiao_esp32c6/smartdooreye.ino.merged.bin",
-    "erase":  true
+    "erase":  false
 }
