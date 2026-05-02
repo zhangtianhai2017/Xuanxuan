@@ -9,6 +9,25 @@
 3. XIAO ESP32C6 用 USB 线接到这台电脑。
 4. 智能猫眼整机正常上电。
 
+## 如果还没有安装 Git
+
+1. 打开浏览器，访问：
+
+```text
+https://git-scm.com/download/win
+```
+
+2. 下载 Windows 版 Git 安装包。
+3. 双击安装包，一路使用默认选项安装即可。
+4. 安装完成后，重新打开本文件夹。
+5. 双击：
+
+```text
+scripts\setup_and_run_remote_agent.cmd
+```
+
+如果窗口提示找不到 `git`，请重启电脑后再试一次。
+
 ## 第 1 步：确认 XIAO 的 COM 口
 
 双击：
