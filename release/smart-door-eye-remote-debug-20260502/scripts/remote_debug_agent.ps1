@@ -141,7 +141,7 @@ function Invoke-EsptoolToLog {
     throw "esptool.exe not found: $esptool"
   }
   ">>> esptool $($Args -join ' ')" | Tee-Object -FilePath $ResultLog -Append
-  & $esptool @Args *>&1 | Tee-Object -FilePath $ResultLog -Append
+  & $esptool @Args *>&1 | Tee-Object -FilePath $ResultLog -Append | Out-Null
   return $LASTEXITCODE
 }
 
@@ -210,10 +210,10 @@ function Invoke-FlashCommand {
     Close-XiaoSerial
     try {
       if ($erase) {
-        $exitCode = Invoke-EsptoolToLog -Args @("--chip","esp32c6","--port",$port,"--baud","921600","--before","default_reset","--after","hard_reset","erase_flash") -ResultLog $resultLog
-        if ($exitCode -ne 0) { throw "erase_flash failed exit=$exitCode" }
+        $exitCode = Invoke-EsptoolToLog -Args @("--chip","esp32c6","--port",$port,"--baud","921600","--before","default-reset","--after","hard-reset","erase-flash") -ResultLog $resultLog
+        if ($exitCode -ne 0) { throw "erase-flash failed exit=$exitCode" }
       }
-      $exitCode = Invoke-EsptoolToLog -Args @("--chip","esp32c6","--port",$port,"--baud","921600","--before","default_reset","--after","hard_reset","write_flash","-z","--flash_mode","qio","--flash_freq","80m","--flash_size","4MB","0x0",$fw) -ResultLog $resultLog
+      $exitCode = Invoke-EsptoolToLog -Args @("--chip","esp32c6","--port",$port,"--baud","921600","--before","default-reset","--after","hard-reset","write-flash","-z","--flash-mode","qio","--flash-freq","80m","--flash-size","4MB","0x0",$fw) -ResultLog $resultLog
     } finally {
       Open-XiaoSerial -Retries 10 -DelaySeconds 2 | Out-Null
     }
@@ -224,10 +224,10 @@ function Invoke-FlashCommand {
     Close-XiaoSerial
     try {
       if ($erase) {
-        $exitCode = Invoke-EsptoolToLog -Args @("--chip","esp32c6","--port",$port,"--baud","921600","--before","default_reset","--after","hard_reset","erase_flash") -ResultLog $resultLog
-        if ($exitCode -ne 0) { throw "erase_flash failed exit=$exitCode" }
+        $exitCode = Invoke-EsptoolToLog -Args @("--chip","esp32c6","--port",$port,"--baud","921600","--before","default-reset","--after","hard-reset","erase-flash") -ResultLog $resultLog
+        if ($exitCode -ne 0) { throw "erase-flash failed exit=$exitCode" }
       }
-      $exitCode = Invoke-EsptoolToLog -Args @("--chip","esp32c6","--port",$port,"--baud","921600","--before","default_reset","--after","hard_reset","write_flash","-z","--flash_mode","qio","--flash_freq","80m","--flash_size","4MB","0x0",$fw) -ResultLog $resultLog
+      $exitCode = Invoke-EsptoolToLog -Args @("--chip","esp32c6","--port",$port,"--baud","921600","--before","default-reset","--after","hard-reset","write-flash","-z","--flash-mode","qio","--flash-freq","80m","--flash-size","4MB","0x0",$fw) -ResultLog $resultLog
     } finally {
       Open-XiaoSerial -Retries 10 -DelaySeconds 2 | Out-Null
     }
@@ -237,10 +237,10 @@ function Invoke-FlashCommand {
     if ([string]::IsNullOrWhiteSpace($port)) { throw "cam port is required" }
     $fw = Get-FirmwarePathFromCommand -Command $Command -DefaultPath ([string]$Config.defaultCamFirmware)
     if ($erase) {
-      $exitCode = Invoke-EsptoolToLog -Args @("--chip","esp32","--port",$port,"--baud","460800","--before","default_reset","--after","hard_reset","erase_flash") -ResultLog $resultLog
-      if ($exitCode -ne 0) { throw "erase_flash failed exit=$exitCode" }
+      $exitCode = Invoke-EsptoolToLog -Args @("--chip","esp32","--port",$port,"--baud","460800","--before","default-reset","--after","hard-reset","erase-flash") -ResultLog $resultLog
+      if ($exitCode -ne 0) { throw "erase-flash failed exit=$exitCode" }
     }
-    $exitCode = Invoke-EsptoolToLog -Args @("--chip","esp32","--port",$port,"--baud","460800","--before","default_reset","--after","hard_reset","write_flash","-z","--flash_mode","dio","--flash_freq","40m","--flash_size","4MB","0x0",$fw) -ResultLog $resultLog
+    $exitCode = Invoke-EsptoolToLog -Args @("--chip","esp32","--port",$port,"--baud","460800","--before","default-reset","--after","hard-reset","write-flash","-z","--flash-mode","dio","--flash-freq","40m","--flash-size","4MB","0x0",$fw) -ResultLog $resultLog
   } else {
     throw "unsupported action: $action"
   }
@@ -377,3 +377,4 @@ try {
   Close-XiaoSerial
   Invoke-GitSync -Message "Remote debug final log $DeviceId $sessionStamp"
 }
+
