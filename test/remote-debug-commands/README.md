@@ -15,10 +15,11 @@ test/remote-debug-commands/<deviceId>/command.json
   "id": "20260502-001",
   "action": "flash_main",
   "firmware": "release/smart-door-eye-remote-debug-20260502/firmware/main_xiao_esp32c6/smartdooreye.ino.merged.bin",
-  "port": "COM5",
   "erase": true
 }
 ```
+
+通常不写 `"port"`，让远程 Agent 使用配置里的 XIAO 串口；如果 Windows 改了 COM 号，Agent 会自动重新查找 USB Serial/XIAO 串口。
 
 仓库里可以保留 `command.example.json` 作为模板。真正要执行时，复制成 `command.json` 并提交；不要把示例文件直接改名，除非确定现场 agent 已经准备好执行。
 

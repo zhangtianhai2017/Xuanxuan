@@ -2,7 +2,7 @@
 
 这个包用于现场电脑。启动后，远程调试人员可以查看 XIAO 日志，并在需要时远程更新 XIAO 主程序。
 
-现场同学只需要改 COM 口，然后保持窗口打开。
+现场同学通常只需要改 COM 口，然后保持窗口打开。配置里的自动串口识别会保持开启，Windows 临时改 COM 号时能自动找回 XIAO。
 
 ## 你需要准备
 
@@ -49,11 +49,12 @@ bootstrap_config.json
 
 ```json
 {
-  "xiaoPort": "COM5"
+  "xiaoPort": "COM5",
+  "autoDetectXiaoPort": true
 }
 ```
 
-把 `COM5` 改成第 1 步看到的 COM 口。其他内容不要改。
+把 `COM5` 改成第 1 步看到的 COM 口。`autoDetectXiaoPort` 保持 `true`，这样换 USB 孔或重新插拔后 COM 号变化也能继续远程调试。其他内容不要改。
 
 ## 第 3 步：启动
 

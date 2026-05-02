@@ -162,6 +162,7 @@ $runtimeConfig = [ordered]@{
   deviceId = $deviceId
   repoRoot = $repoRoot
   xiaoPort = $xiaoPort
+  autoDetectXiaoPort = $Config.autoDetectXiaoPort -ne $false
   xiaoBaud = if ([int]$Config.xiaoBaud -gt 0) { [int]$Config.xiaoBaud } else { 115200 }
   logDir = if ([string]::IsNullOrWhiteSpace([string]$Config.logDir)) { "test/remote-debug-logs" } else { [string]$Config.logDir }
   commandDir = if ([string]::IsNullOrWhiteSpace([string]$Config.commandDir)) { "test/remote-debug-commands" } else { [string]$Config.commandDir }

@@ -54,11 +54,12 @@ bootstrap_config.json
 
 ```json
 {
-  "xiaoPort": "COM5"
+  "xiaoPort": "COM5",
+  "autoDetectXiaoPort": true
 }
 ```
 
-把 `COM5` 改成第 1 步看到的 COM 口。其他内容不要改。
+把 `COM5` 改成第 1 步看到的 COM 口。`autoDetectXiaoPort` 保持 `true`，这样 Windows 把 XIAO 改成另一个 COM 号时，调试程序会自动重新查找 USB 串口。其他内容不要改。
 
 ## 第 3 步：启动
 

@@ -3,6 +3,7 @@
   "repoRoot": "",
   "xiaoPort": "COM5",
   "camPort": "",
+  "autoDetectXiaoPort": true,
   "xiaoBaud": 115200,
   "logDir": "test/remote-debug-logs",
   "commandDir": "test/remote-debug-commands",

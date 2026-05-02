@@ -119,6 +119,104 @@ function Write-AgentLog {
   $out | Tee-Object -FilePath $AgentLogFile -Append
 }
 
+function Get-SerialPortInventory {
+  $portNames = @()
+  try {
+    $portNames = [System.IO.Ports.SerialPort]::GetPortNames() | Sort-Object
+  } catch {
+    Write-AgentLog "serial_list_failed error=$($_.Exception.Message)"
+    return @()
+  }
+
+  $pnpEntities = @()
+  try {
+    # 这里读取 Windows 设备管理器里的友好名称，例如
+    # "USB Serial Device (COM7)"。这些名称能帮助 Agent 避开蓝牙虚拟串口，
+    # 在远程调试时自动找回 XIAO ESP32C6 的 USB 调试口。
+    $pnpEntities = Get-CimInstance Win32_PnPEntity -ErrorAction SilentlyContinue |
+      Where-Object { $_.Name -match '\(COM\d+\)' }
+  } catch {
+    $pnpEntities = @()
+  }
+
+  $inventory = @()
+  foreach ($portName in $portNames) {
+    $friendlyName = ""
+    $matchPattern = "\($([regex]::Escape($portName))\)"
+    $entity = $pnpEntities | Where-Object { $_.Name -match $matchPattern } | Select-Object -First 1
+    if ($null -ne $entity) {
+      $friendlyName = [string]$entity.Name
+    }
+    $inventory += [pscustomobject]@{
+      Port = $portName
+      Name = $friendlyName
+    }
+  }
+  return $inventory
+}
+
+function Format-SerialPortInventory {
+  param([object[]]$Inventory)
+  if ($null -eq $Inventory -or $Inventory.Count -eq 0) {
+    return "none"
+  }
+  return (($Inventory | ForEach-Object {
+    $name = [string]$_.Name
+    if ([string]::IsNullOrWhiteSpace($name)) {
+      "$($_.Port):unknown"
+    } else {
+      "$($_.Port):$($name -replace '\s+', '_')"
+    }
+  }) -join ",")
+}
+
+function Resolve-XiaoPort {
+  param([string]$PreferredPort)
+
+  $autoDetect = $Config.autoDetectXiaoPort -ne $false
+  $inventory = @(Get-SerialPortInventory)
+  $ports = @($inventory | ForEach-Object { $_.Port })
+
+  if (-not [string]::IsNullOrWhiteSpace($PreferredPort) -and
+      $PreferredPort.ToUpperInvariant() -ne "AUTO" -and
+      ($ports -contains $PreferredPort)) {
+    return $PreferredPort
+  }
+
+  if (-not $autoDetect) {
+    return $PreferredPort
+  }
+
+  $usablePorts = @($inventory | Where-Object {
+    $name = [string]$_.Name
+    # 现场电脑经常有 COM3/COM4/COM5/COM6 这类蓝牙虚拟串口。
+    # 它们能被 Windows 列出来，但不是 XIAO 的 USB 调试口，自动选择时要排除。
+    $name -notmatch 'Bluetooth|蓝牙'
+  })
+
+  $priorityPorts = @($usablePorts | Where-Object {
+    $name = [string]$_.Name
+    $name -match 'XIAO|ESP32|USB|Serial|串行|CP210|CH340|CH910|UART|CDC|JTAG'
+  })
+
+  $selected = $null
+  if ($priorityPorts.Count -gt 0) {
+    $selected = $priorityPorts | Select-Object -First 1
+  } elseif ($usablePorts.Count -eq 1) {
+    $selected = $usablePorts | Select-Object -First 1
+  }
+
+  if ($null -ne $selected) {
+    $inventoryText = Format-SerialPortInventory -Inventory $inventory
+    Write-AgentLog "serial_auto_detect preferred=$PreferredPort selected=$($selected.Port) inventory=$inventoryText"
+    return [string]$selected.Port
+  }
+
+  $inventoryText = Format-SerialPortInventory -Inventory $inventory
+  Write-AgentLog "serial_auto_detect_failed preferred=$PreferredPort inventory=$inventoryText"
+  return $PreferredPort
+}
+
 function Get-AgentScriptHash {
   if ([string]::IsNullOrWhiteSpace($AgentScriptPath) -or -not (Test-Path $AgentScriptPath)) {
     return ""
@@ -219,16 +317,20 @@ function Open-XiaoSerial {
   Close-XiaoSerial
   for ($attempt = 1; $attempt -le $Retries; $attempt++) {
     try {
-      $script:Serial = New-Object System.IO.Ports.SerialPort $XiaoPort, $XiaoBaud, "None", 8, "One"
+      $resolvedPort = Resolve-XiaoPort -PreferredPort $script:XiaoPort
+      if (-not [string]::IsNullOrWhiteSpace($resolvedPort)) {
+        $script:XiaoPort = $resolvedPort
+      }
+      $script:Serial = New-Object System.IO.Ports.SerialPort $script:XiaoPort, $XiaoBaud, "None", 8, "One"
       $script:Serial.Encoding = [System.Text.Encoding]::ASCII
       $script:Serial.ReadTimeout = 1000
       $script:Serial.DtrEnable = $true
       $script:Serial.RtsEnable = $true
       $script:Serial.Open()
-      Write-AgentLog "serial_open port=$XiaoPort baud=$XiaoBaud attempt=$attempt"
+      Write-AgentLog "serial_open port=$script:XiaoPort baud=$XiaoBaud attempt=$attempt"
       return $true
     } catch {
-      Write-AgentLog "serial_open_failed port=$XiaoPort attempt=$attempt error=$($_.Exception.Message)"
+      Write-AgentLog "serial_open_failed port=$script:XiaoPort attempt=$attempt error=$($_.Exception.Message)"
       Close-XiaoSerial
       if ($attempt -lt $Retries) {
         Start-Sleep -Seconds $DelaySeconds
@@ -265,7 +367,7 @@ function Invoke-FlashCommand {
 
   if ($action -eq "flash_main") {
     if ($Config.allowFlashMain -ne $true) { throw "flash_main disabled by config" }
-    if ([string]::IsNullOrWhiteSpace($port)) { $port = $XiaoPort }
+    if ([string]::IsNullOrWhiteSpace($port)) { $port = Resolve-XiaoPort -PreferredPort $script:XiaoPort }
     $fw = Get-FirmwarePathFromCommand -Command $Command -DefaultPath ([string]$Config.defaultMainFirmware)
     Close-XiaoSerial
     try {
@@ -279,7 +381,7 @@ function Invoke-FlashCommand {
     }
   } elseif ($action -eq "flash_xvf_test") {
     if ($Config.allowFlashXvfTest -ne $true) { throw "flash_xvf_test disabled by config" }
-    if ([string]::IsNullOrWhiteSpace($port)) { $port = $XiaoPort }
+    if ([string]::IsNullOrWhiteSpace($port)) { $port = Resolve-XiaoPort -PreferredPort $script:XiaoPort }
     $fw = Get-FirmwarePathFromCommand -Command $Command -DefaultPath ([string]$Config.defaultXvfTestFirmware)
     Close-XiaoSerial
     try {
@@ -364,8 +466,8 @@ if ([string]::IsNullOrWhiteSpace($repoRootConfig)) {
 }
 $RepoRoot = (Resolve-Path $repoRootConfig).Path
 
-$XiaoPort = [string]$Config.xiaoPort
-if ([string]::IsNullOrWhiteSpace($XiaoPort)) { throw "xiaoPort is required in remote_agent_config.json" }
+$script:XiaoPort = [string]$Config.xiaoPort
+if ([string]::IsNullOrWhiteSpace($script:XiaoPort)) { $script:XiaoPort = "AUTO" }
 $XiaoBaud = [int]$Config.xiaoBaud
 if ($XiaoBaud -le 0) { $XiaoBaud = 115200 }
 
@@ -374,7 +476,7 @@ $DeviceLogDir = Join-Path $RepoRoot $RelDeviceLogDir
 New-Item -ItemType Directory -Force $DeviceLogDir | Out-Null
 
 $sessionStamp = Get-Date -Format "yyyyMMdd_HHmmss"
-$SerialLogFile = Join-Path $DeviceLogDir "$sessionStamp-live-XIAO-$($XiaoPort -replace '[^A-Za-z0-9_.-]', '_').log"
+$SerialLogFile = Join-Path $DeviceLogDir "$sessionStamp-live-XIAO-$($script:XiaoPort -replace '[^A-Za-z0-9_.-]', '_').log"
 $AgentLogFile = Join-Path $DeviceLogDir "$sessionStamp-agent.log"
 $LastCommandFile = Join-Path $DeviceLogDir "last_command_id.txt"
 $script:InitialAgentScriptHash = Get-AgentScriptHash
@@ -388,16 +490,17 @@ Write-Host ""
 Write-Host "=== Remote Debug Agent ==="
 Write-Host "deviceId=$DeviceId"
 Write-Host "repoRoot=$RepoRoot"
-Write-Host "xiaoPort=$XiaoPort"
+Write-Host "xiaoPort=$script:XiaoPort"
+Write-Host "autoDetectXiaoPort=$($Config.autoDetectXiaoPort -ne $false)"
 Write-Host "serialLog=$SerialLogFile"
 Write-Host "agentLog=$AgentLogFile"
 Write-Host "commandPath=$(Join-Path $RepoRoot (Join-Path ([string]$Config.commandDir) (Join-Path $DeviceId 'command.json')))"
 Write-Host "Press Ctrl+C to stop."
 Write-Host ""
 
-Write-AgentLog "agent_start deviceId=$DeviceId repoRoot=$RepoRoot xiaoPort=$XiaoPort"
+Write-AgentLog "agent_start deviceId=$DeviceId repoRoot=$RepoRoot xiaoPort=$script:XiaoPort autoDetectXiaoPort=$($Config.autoDetectXiaoPort -ne $false)"
 while (-not (Open-XiaoSerial -Retries 1)) {
-  Write-Host "Waiting for XIAO serial port $XiaoPort ..."
+  Write-Host "Waiting for XIAO serial port $script:XiaoPort ..."
   Start-Sleep -Seconds 5
 }
 
@@ -405,7 +508,7 @@ $nextPushAt = (Get-Date).AddSeconds($LogPushInterval)
 $nextCommandAt = (Get-Date).AddSeconds(3)
 
 try {
-  "=== remote agent serial log started $(Get-Date -Format o), deviceId=$DeviceId, port=$XiaoPort, baud=$XiaoBaud ===" | Tee-Object -FilePath $SerialLogFile -Append
+  "=== remote agent serial log started $(Get-Date -Format o), deviceId=$DeviceId, port=$script:XiaoPort, baud=$XiaoBaud ===" | Tee-Object -FilePath $SerialLogFile -Append
   while ($true) {
     if ($null -eq $Serial -or -not $Serial.IsOpen) {
       Open-XiaoSerial -Retries 1 | Out-Null
@@ -420,7 +523,7 @@ try {
       } catch [System.TimeoutException] {
         # Allows periodic git sync and command polling.
       } catch {
-        Write-AgentLog "serial_read_failed port=$XiaoPort error=$($_.Exception.Message)"
+        Write-AgentLog "serial_read_failed port=$script:XiaoPort error=$($_.Exception.Message)"
         Close-XiaoSerial
         Start-Sleep -Seconds 2
       }

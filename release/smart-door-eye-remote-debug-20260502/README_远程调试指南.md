@@ -112,6 +112,7 @@ scripts/flash_main_xiao_esp32c6.cmd
   "deviceId": "smart-door-eye-lab-01",
   "repoRoot": "",
   "xiaoPort": "COM5",
+  "autoDetectXiaoPort": true,
   "camPort": "",
   "autoPush": true,
   "allowFlashMain": true,
@@ -156,7 +157,6 @@ release/smart-door-eye-remote-debug-20260502/firmware/main_xiao_esp32c6/smartdoo
   "id": "20260502-001",
   "action": "flash_main",
   "firmware": "release/smart-door-eye-remote-debug-20260502/firmware/main_xiao_esp32c6/smartdooreye.ino.merged.bin",
-  "port": "COM5",
   "erase": true
 }
 ```
