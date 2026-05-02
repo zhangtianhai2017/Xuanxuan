@@ -273,7 +273,7 @@ function Invoke-FlashCommand {
         $exitCode = Invoke-EsptoolToLog -ToolArgs @("--chip","esp32c6","--port",$port,"--baud","921600","--before","default-reset","--after","hard-reset","erase-flash") -ResultLog $resultLog
         if ($exitCode -ne 0) { throw "erase-flash failed exit=$exitCode" }
       }
-      $exitCode = Invoke-EsptoolToLog -ToolArgs @("--chip","esp32c6","--port",$port,"--baud","921600","--before","default-reset","--after","hard-reset","write-flash","-z","--flash-mode","qio","--flash-freq","80m","--flash-size","4MB","0x0",$fw) -ResultLog $resultLog
+      $exitCode = Invoke-EsptoolToLog -ToolArgs @("--chip","esp32c6","--port",$port,"--baud","921600","--before","default-reset","--after","hard-reset","write-flash","-z","--flash-mode","dio","--flash-freq","80m","--flash-size","4MB","0x0",$fw) -ResultLog $resultLog
     } finally {
       Open-XiaoSerial -Retries 10 -DelaySeconds 2 | Out-Null
     }
@@ -287,7 +287,7 @@ function Invoke-FlashCommand {
         $exitCode = Invoke-EsptoolToLog -ToolArgs @("--chip","esp32c6","--port",$port,"--baud","921600","--before","default-reset","--after","hard-reset","erase-flash") -ResultLog $resultLog
         if ($exitCode -ne 0) { throw "erase-flash failed exit=$exitCode" }
       }
-      $exitCode = Invoke-EsptoolToLog -ToolArgs @("--chip","esp32c6","--port",$port,"--baud","921600","--before","default-reset","--after","hard-reset","write-flash","-z","--flash-mode","qio","--flash-freq","80m","--flash-size","4MB","0x0",$fw) -ResultLog $resultLog
+      $exitCode = Invoke-EsptoolToLog -ToolArgs @("--chip","esp32c6","--port",$port,"--baud","921600","--before","default-reset","--after","hard-reset","write-flash","-z","--flash-mode","dio","--flash-freq","80m","--flash-size","4MB","0x0",$fw) -ResultLog $resultLog
     } finally {
       Open-XiaoSerial -Retries 10 -DelaySeconds 2 | Out-Null
     }
