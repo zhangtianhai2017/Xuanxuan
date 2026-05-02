@@ -171,6 +171,7 @@ $runtimeConfig = [ordered]@{
   allowFlashMain = $Config.allowFlashMain -eq $true
   allowFlashXvfTest = $Config.allowFlashXvfTest -eq $true
   allowFlashCam = $Config.allowFlashCam -eq $true
+  autoRestartOnAgentUpdate = $Config.autoRestartOnAgentUpdate -ne $false
   gitUserName = if ([string]::IsNullOrWhiteSpace([string]$Config.gitUserName)) { "Smart Door Eye Remote Agent" } else { [string]$Config.gitUserName }
   gitUserEmail = if ([string]::IsNullOrWhiteSpace([string]$Config.gitUserEmail)) { "smart-door-eye-agent@example.invalid" } else { [string]$Config.gitUserEmail }
   defaultMainFirmware = $mainFirmwareRel
@@ -183,4 +184,22 @@ Write-Step "Starting remote debug agent"
 Write-Host "Agent script: $agentScript"
 Write-Host "Agent config: $runtimeConfigPath"
 Write-Host "Leave this window open after the agent starts."
-& powershell -NoProfile -ExecutionPolicy Bypass -File $agentScript -ConfigPath $runtimeConfigPath
+$restartExitCode = 75
+do {
+  $env:SMART_DOOR_EYE_AGENT_WRAPPER = "1"
+  try {
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $agentScript -ConfigPath $runtimeConfigPath
+    $agentExitCode = $LASTEXITCODE
+  } finally {
+    Remove-Item Env:\SMART_DOOR_EYE_AGENT_WRAPPER -ErrorAction SilentlyContinue
+  }
+  if ($agentExitCode -eq $restartExitCode) {
+    Write-Step "Agent updated itself; restarting"
+    Invoke-Git -GitArgs @("-C", $repoRoot, "pull", "--rebase", "--autostash") -FailureMessage "git pull before agent restart failed"
+    Start-Sleep -Seconds 2
+  }
+} while ($agentExitCode -eq $restartExitCode)
+
+if ($agentExitCode -ne 0) {
+  throw "Remote debug agent stopped with exit code $agentExitCode."
+}

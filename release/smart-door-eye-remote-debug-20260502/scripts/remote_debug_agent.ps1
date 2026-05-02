@@ -11,6 +11,14 @@ if (-not (Test-Path $ConfigPath)) {
   throw "Config not found: $ConfigPath"
 }
 
+$ConfigPath = (Resolve-Path $ConfigPath).Path
+$AgentScriptPath = if (-not [string]::IsNullOrWhiteSpace($PSCommandPath)) {
+  (Resolve-Path $PSCommandPath).Path
+} else {
+  (Resolve-Path $MyInvocation.MyCommand.Path).Path
+}
+$script:AgentRestartRequested = $false
+
 $Config = Get-Content -Raw -Encoding UTF8 $ConfigPath | ConvertFrom-Json
 
 function Find-GitRoot {
@@ -53,6 +61,7 @@ function Invoke-GitSync {
   if ($LASTEXITCODE -ne 0) {
     Write-Warning "git pull failed; continuing local logging."
   }
+  Test-AgentSelfUpdate | Out-Null
 
   Ensure-GitIdentity
 
@@ -108,6 +117,56 @@ function Write-AgentLog {
   param([string]$Line)
   $out = "$(Get-Date -Format o) [AGENT] $Line"
   $out | Tee-Object -FilePath $AgentLogFile -Append
+}
+
+function Get-AgentScriptHash {
+  if ([string]::IsNullOrWhiteSpace($AgentScriptPath) -or -not (Test-Path $AgentScriptPath)) {
+    return ""
+  }
+  return (Get-FileHash -Algorithm SHA256 -LiteralPath $AgentScriptPath).Hash
+}
+
+function Test-AgentSelfUpdate {
+  $autoRestart = $Config.autoRestartOnAgentUpdate -ne $false
+  if (-not $autoRestart -or $script:AgentRestartRequested) {
+    return $false
+  }
+  $currentHash = Get-AgentScriptHash
+  if (-not [string]::IsNullOrWhiteSpace($script:InitialAgentScriptHash) -and
+      -not [string]::IsNullOrWhiteSpace($currentHash) -and
+      $currentHash -ne $script:InitialAgentScriptHash) {
+    $script:AgentRestartRequested = $true
+    Write-AgentLog "agent_update_detected action=restart script=$AgentScriptPath"
+    return $true
+  }
+  return $false
+}
+
+function ConvertTo-ProcessArgument {
+  param([string]$Value)
+  return '"' + ($Value -replace '"', '\"') + '"'
+}
+
+function Start-AgentReplacement {
+  $powershellPath = (Get-Process -Id $PID).Path
+  if ([string]::IsNullOrWhiteSpace($powershellPath)) {
+    $powershellPath = Join-Path $PSHOME "powershell.exe"
+  }
+
+  # The bootstrap wrapper normally restarts the agent in the same console.
+  # This fallback matters when an older bootstrap package starts a newer agent:
+  # the agent can still relaunch itself after pulling an updated script.
+  $argumentList = @(
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    (ConvertTo-ProcessArgument $AgentScriptPath),
+    "-ConfigPath",
+    (ConvertTo-ProcessArgument $ConfigPath)
+  ) -join " "
+  Start-Process -FilePath $powershellPath -ArgumentList $argumentList -WorkingDirectory $PackageRoot -WindowStyle Hidden
+  Write-AgentLog "agent_replacement_started mode=direct script=$AgentScriptPath"
 }
 
 function Get-CommandFile {
@@ -256,6 +315,9 @@ function Invoke-FlashCommand {
 function Poll-RemoteCommand {
   try {
     & git -C $RepoRoot pull --rebase --autostash
+    if (Test-AgentSelfUpdate) {
+      return
+    }
     $commandFile = Get-CommandFile
     if ($null -eq $commandFile) {
       return
@@ -314,6 +376,7 @@ $sessionStamp = Get-Date -Format "yyyyMMdd_HHmmss"
 $SerialLogFile = Join-Path $DeviceLogDir "$sessionStamp-live-XIAO-$($XiaoPort -replace '[^A-Za-z0-9_.-]', '_').log"
 $AgentLogFile = Join-Path $DeviceLogDir "$sessionStamp-agent.log"
 $LastCommandFile = Join-Path $DeviceLogDir "last_command_id.txt"
+$script:InitialAgentScriptHash = Get-AgentScriptHash
 
 $LogPushInterval = [int]$Config.logPushIntervalSeconds
 if ($LogPushInterval -le 0) { $LogPushInterval = 60 }
@@ -366,15 +429,32 @@ try {
     if ($now -ge $nextCommandAt) {
       $nextCommandAt = $now.AddSeconds($CommandPollInterval)
       Poll-RemoteCommand
+      if ($script:AgentRestartRequested) {
+        break
+      }
     }
     if ($now -ge $nextPushAt) {
       $nextPushAt = $now.AddSeconds($LogPushInterval)
       Invoke-GitSync -Message "Remote debug live log $DeviceId $sessionStamp"
+      if ($script:AgentRestartRequested) {
+        break
+      }
     }
   }
 } finally {
-  Write-AgentLog "agent_stop"
+  if ($script:AgentRestartRequested) {
+    Write-AgentLog "agent_stop reason=self_update"
+  } else {
+    Write-AgentLog "agent_stop"
+  }
   Close-XiaoSerial
   Invoke-GitSync -Message "Remote debug final log $DeviceId $sessionStamp"
+}
+
+if ($script:AgentRestartRequested) {
+  if ($env:SMART_DOOR_EYE_AGENT_WRAPPER -ne "1") {
+    Start-AgentReplacement
+  }
+  exit 75
 }
 

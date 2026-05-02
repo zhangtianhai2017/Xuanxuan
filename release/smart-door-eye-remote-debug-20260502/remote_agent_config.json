@@ -12,6 +12,7 @@
   "allowFlashMain": true,
   "allowFlashXvfTest": true,
   "allowFlashCam": false,
+  "autoRestartOnAgentUpdate": true,
   "gitUserName": "Smart Door Eye Remote Agent",
   "gitUserEmail": "smart-door-eye-agent@example.invalid",
   "defaultMainFirmware": "release/smart-door-eye-remote-debug-20260502/firmware/main_xiao_esp32c6/smartdooreye.ino.merged.bin",
