@@ -11,6 +11,7 @@
 */
 
 #include "audio_task.h"
+#include "config.h"
 #include "debug_log.h"
 #include "AudioTools.h"
 #include "AudioTools/Communication/AudioHttp.h"
@@ -102,11 +103,28 @@ static bool startAudioFromUrl(const char* url) {
     i2sStream.begin(cfg);
 
     decoder.begin();
-    urlStream.begin(url, "audio/mp3");
+    // URLStream.begin() 内部会发起 TCP/TLS/HTTP 请求。弱 WiFi 下它可能阻塞，
+    // 所以先设置短超时，并且不等待首包数据，避免音频网络问题拖住门铃/PIR 主流程。
+    urlStream.setTimeout(AUDIO_HTTP_TIMEOUT_MS);
+    urlStream.setWaitForData(false);
+    bool streamStarted = urlStream.begin(url, "audio/mp3");
+    if (!streamStarted) {
+        logError("AUDIO", "PLAY_BEGIN_FAILED",
+                 String("timeout_ms=") + AUDIO_HTTP_TIMEOUT_MS
+                 + " wifi_status=" + WiFi.status()
+                 + " rssi=" + WiFi.RSSI()
+                 + " url=" + url);
+        stopCurrentAudio();
+        return false;
+    }
+
     audioActive = true;
     audioSawData = false;
     lastAudioDataTime = millis();
-    logInfo("AUDIO", "PLAY_START", String("url=") + url);
+    logInfo("AUDIO", "PLAY_START",
+            String("timeout_ms=") + AUDIO_HTTP_TIMEOUT_MS
+            + " rssi=" + WiFi.RSSI()
+            + " url=" + url);
     return true;
 }
 

@@ -2,9 +2,9 @@ A052AC41E8356233EE393887D31815F63B8B72801FD9512618E9FA15EE90FDDC  .\release\smar
 1191EB3D913873C709C2FA100F829F4B824971000C0B8831B33F05F98BE3282A  .\release\smart-door-eye-remote-debug-20260502\firmware\cam_ai_thinker_esp32cam\CameraWebServer.ino.bootloader.bin
 0ECE7343899BE582D70D9B86A47AB955D01E731A1582EB90A8F5E4C646BACD59  .\release\smart-door-eye-remote-debug-20260502\firmware\cam_ai_thinker_esp32cam\CameraWebServer.ino.merged.bin
 AAAE2888C5A6A348004B5B436F47ABB25AE32E72D9003902955A998EDA723EDD  .\release\smart-door-eye-remote-debug-20260502\firmware\cam_ai_thinker_esp32cam\CameraWebServer.ino.partitions.bin
-6EB5EAF296E8F7B76C8BC56E5223FAF80758EB20D73D1492D27B37B0F2CE0F47  .\release\smart-door-eye-remote-debug-20260502\firmware\main_xiao_esp32c6\smartdooreye.ino.bin
+24803FAB7AC4C3D5950653556667E2DA5FEA4CA7C1968FBE39A15B227DF15399  .\release\smart-door-eye-remote-debug-20260502\firmware\main_xiao_esp32c6\smartdooreye.ino.bin
 517CB594DA4C38C3E376976951462C2BD7991A60BC16E43E08D29491368EB0BE  .\release\smart-door-eye-remote-debug-20260502\firmware\main_xiao_esp32c6\smartdooreye.ino.bootloader.bin
-E4EB71B378338B89153614D3F54334DC19A3A0368B0331DB2230467376CF52AF  .\release\smart-door-eye-remote-debug-20260502\firmware\main_xiao_esp32c6\smartdooreye.ino.merged.bin
+CBDA9E74A783E18EC38770FB7A035578FA22F2A0DF4D74F8C686018DEB99D39B  .\release\smart-door-eye-remote-debug-20260502\firmware\main_xiao_esp32c6\smartdooreye.ino.merged.bin
 AAAE2888C5A6A348004B5B436F47ABB25AE32E72D9003902955A998EDA723EDD  .\release\smart-door-eye-remote-debug-20260502\firmware\main_xiao_esp32c6\smartdooreye.ino.partitions.bin
 3CBDE3558E6AD770EAB9D5C1A828374EB2AE7D2EDE47122828F9C5E6F47E538E  .\release\smart-door-eye-remote-debug-20260502\firmware\xvf_i2s_test_xiao_esp32c6\sketch_apr18a.ino.bin
 D8499F4367C3A8377D513A2FD0E94B5AD6974D2C13591B52BAD56183AA7002E7  .\release\smart-door-eye-remote-debug-20260502\firmware\xvf_i2s_test_xiao_esp32c6\sketch_apr18a.ino.bootloader.bin
