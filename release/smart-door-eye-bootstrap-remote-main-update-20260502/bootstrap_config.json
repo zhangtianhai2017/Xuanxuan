@@ -1,0 +1,16 @@
+{
+  "repoUrl": "https://github.com/zhangtianhai2017/Xuanxuan.git",
+  "repoRoot": "%USERPROFILE%\\Documents\\XuanXuan-smart-door-eye",
+  "deviceId": "smart-door-eye-lab-01",
+  "xiaoPort": "COM5",
+  "xiaoBaud": 115200,
+  "agentPackageDir": "release/smart-door-eye-remote-debug-20260502",
+  "logDir": "test/remote-debug-logs",
+  "commandDir": "test/remote-debug-commands",
+  "logPushIntervalSeconds": 60,
+  "commandPollIntervalSeconds": 20,
+  "autoPush": true,
+  "allowFlashMain": true,
+  "allowFlashXvfTest": true,
+  "allowFlashCam": false
+}
