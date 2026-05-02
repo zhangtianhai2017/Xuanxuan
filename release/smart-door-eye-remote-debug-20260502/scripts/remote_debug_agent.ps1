@@ -54,6 +54,8 @@ function Invoke-GitSync {
     Write-Warning "git pull failed; continuing local logging."
   }
 
+  Ensure-GitIdentity
+
   & git -C $RepoRoot add -- $RelDeviceLogDir
   if ($LASTEXITCODE -ne 0) {
     Write-Warning "git add failed."
@@ -76,6 +78,29 @@ function Invoke-GitSync {
     if ($LASTEXITCODE -ne 0) {
       Write-Warning "git push failed."
     }
+  }
+}
+
+function Ensure-GitIdentity {
+  $name = [string]$Config.gitUserName
+  $email = [string]$Config.gitUserEmail
+  if ([string]::IsNullOrWhiteSpace($name)) {
+    $name = "Smart Door Eye Remote Agent"
+  }
+  if ([string]::IsNullOrWhiteSpace($email)) {
+    $email = "smart-door-eye-agent@example.invalid"
+  }
+
+  $currentName = (& git -C $RepoRoot config user.name 2>$null)
+  if ([string]::IsNullOrWhiteSpace($currentName)) {
+    & git -C $RepoRoot config user.name $name
+    Write-AgentLog "git_config_set key=user.name value=`"$name`""
+  }
+
+  $currentEmail = (& git -C $RepoRoot config user.email 2>$null)
+  if ([string]::IsNullOrWhiteSpace($currentEmail)) {
+    & git -C $RepoRoot config user.email $email
+    Write-AgentLog "git_config_set key=user.email value=`"$email`""
   }
 }
 

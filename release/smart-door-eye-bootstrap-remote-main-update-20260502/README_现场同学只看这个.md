@@ -71,6 +71,7 @@ scripts\setup_and_run_remote_agent.cmd
 - 不要拔掉 XIAO USB。
 - 保持电脑联网。
 - 如果弹出 GitHub 登录窗口，请用已获得仓库写入权限的 GitHub 账号登录。
+- 脚本会自动设置本仓库的 Git 提交身份，不需要手动运行 `git config`。
 
 ## 它会自动做什么
 
@@ -87,6 +88,8 @@ scripts\setup_and_run_remote_agent.cmd
 xiaoPort =
 电脑能否 git push = 是 / 否 / 不确定
 ```
+
+如果窗口提示 `Author identity unknown`，请按 `Ctrl+C` 停止窗口，然后重新双击 `scripts\setup_and_run_remote_agent.cmd`。
 
 ## 不要做的事
 

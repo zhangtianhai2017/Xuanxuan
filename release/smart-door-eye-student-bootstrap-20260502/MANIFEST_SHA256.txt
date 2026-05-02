@@ -1,5 +1,5 @@
-﻿19A9EB373C4FE4CF6B6FE0B9956BE1BE48D51989C8E695394E05D3E5E233D337  .\release\smart-door-eye-student-bootstrap-20260502\bootstrap_config.json
-4B4B1D0F4E9BCE9B4EB0F1C0849F003F3459B8FE23851DF18E50DA4067408C2D  .\release\smart-door-eye-student-bootstrap-20260502\README_现场同学只看这个.md
+﻿3B8715B6B21B7625F52440E196166675C4E33620A203E6CD5DC3B1A76DEE9149  .\release\smart-door-eye-student-bootstrap-20260502\bootstrap_config.json
+33A87A6A081A53F3609E2447D37ECD97E24D96277A2DFCC99CBF29B314E0268C  .\release\smart-door-eye-student-bootstrap-20260502\README_现场同学只看这个.md
 B1894A0F830BCE8E9302A8AD87EA5C7CFF4E8BE2EF9DED7F07010364E5770815  .\release\smart-door-eye-student-bootstrap-20260502\scripts\list_ports.cmd
 94DAE2DF508B00B677B9A34F84F3766A9677673962C214E484B6C226F5BB6707  .\release\smart-door-eye-student-bootstrap-20260502\scripts\setup_and_run_remote_agent.cmd
-97336B1179713AEE21FFC65AA9C25E6E41FAEEE3DA2AC22BC509958FC878EB32  .\release\smart-door-eye-student-bootstrap-20260502\scripts\setup_and_run_remote_agent.ps1
+81C34AA14070127EA175B0C296ED8147EC0C1F50CFC12850B95606988E631A7D  .\release\smart-door-eye-student-bootstrap-20260502\scripts\setup_and_run_remote_agent.ps1

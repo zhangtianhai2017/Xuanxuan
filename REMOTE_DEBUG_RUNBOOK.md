@@ -116,6 +116,7 @@ CAM 首次烧录和普通重刷需要现场介入，因为通常要 `GPIO0` 接 
 
 - 只看到 `serial_open_failed`：现场 COM 口填错，或 XIAO 没接到电脑。
 - 没有日志上传：现场 Git 没有 push 权限，或 Agent 窗口被关闭。
+- `Author identity unknown`：旧 Agent 没有本地 Git 身份配置。让现场按 `Ctrl+C` 停止窗口，再重新运行 bootstrap；新版本会自动设置本仓库的 `user.name/user.email`。
 - 命令不执行：确认 `command.json` 的 `id` 是新值，Agent 每个 `id` 只执行一次。
 - 烧写失败但日志还在：查看 `command-results` 下的最新结果文件。
 

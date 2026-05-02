@@ -77,6 +77,7 @@ scripts\setup_and_run_remote_agent.cmd
 3. 自动读取 XIAO 串口日志。
 4. 自动把日志上传到项目 Git 仓库。
 5. 自动接收远程调试人员下发的调试命令。
+6. 自动设置本仓库的 Git 提交身份，不需要手动运行 `git config`。
 
 ## 如果窗口报错
 
@@ -86,6 +87,8 @@ scripts\setup_and_run_remote_agent.cmd
 xiaoPort =
 电脑能否 git push = 是 / 否 / 不确定
 ```
+
+如果窗口提示 `Author identity unknown`，请按 `Ctrl+C` 停止窗口，然后重新双击 `scripts\setup_and_run_remote_agent.cmd`。
 
 ## 不要做的事
 

@@ -12,5 +12,7 @@
   "autoPush": true,
   "allowFlashMain": true,
   "allowFlashXvfTest": true,
-  "allowFlashCam": false
+  "allowFlashCam": false,
+  "gitUserName": "Smart Door Eye Remote Agent",
+  "gitUserEmail": "smart-door-eye-agent@example.invalid"
 }

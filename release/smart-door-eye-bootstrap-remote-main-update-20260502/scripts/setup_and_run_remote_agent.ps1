@@ -46,6 +46,30 @@ function Invoke-Git {
   }
 }
 
+function Set-LocalGitIdentity {
+  param(
+    [string]$WorkDir,
+    [string]$Name,
+    [string]$Email
+  )
+  if ([string]::IsNullOrWhiteSpace($Name)) {
+    $Name = "Smart Door Eye Remote Agent"
+  }
+  if ([string]::IsNullOrWhiteSpace($Email)) {
+    $Email = "smart-door-eye-agent@example.invalid"
+  }
+
+  $currentName = (& git -C $WorkDir config user.name 2>$null)
+  if ([string]::IsNullOrWhiteSpace($currentName)) {
+    Invoke-Git -GitArgs @("-C", $WorkDir, "config", "user.name", $Name) -FailureMessage "git config user.name failed"
+  }
+
+  $currentEmail = (& git -C $WorkDir config user.email 2>$null)
+  if ([string]::IsNullOrWhiteSpace($currentEmail)) {
+    Invoke-Git -GitArgs @("-C", $WorkDir, "config", "user.email", $Email) -FailureMessage "git config user.email failed"
+  }
+}
+
 function Require-File {
   param([string]$PathValue, [string]$Description)
   if (-not (Test-Path $PathValue)) {
@@ -111,6 +135,9 @@ if (Test-Path (Join-Path $repoRoot ".git")) {
   Invoke-Git -GitArgs @("clone", $repoUrl, $repoRoot) -FailureMessage "git clone failed"
 }
 
+Write-Step "Configuring local Git identity"
+Set-LocalGitIdentity -WorkDir $repoRoot -Name ([string]$Config.gitUserName) -Email ([string]$Config.gitUserEmail)
+
 Write-Step "Checking downloaded remote debug agent"
 $agentPackageDir = [string]$Config.agentPackageDir
 if ([string]::IsNullOrWhiteSpace($agentPackageDir)) {
@@ -144,6 +171,8 @@ $runtimeConfig = [ordered]@{
   allowFlashMain = $Config.allowFlashMain -eq $true
   allowFlashXvfTest = $Config.allowFlashXvfTest -eq $true
   allowFlashCam = $Config.allowFlashCam -eq $true
+  gitUserName = if ([string]::IsNullOrWhiteSpace([string]$Config.gitUserName)) { "Smart Door Eye Remote Agent" } else { [string]$Config.gitUserName }
+  gitUserEmail = if ([string]::IsNullOrWhiteSpace([string]$Config.gitUserEmail)) { "smart-door-eye-agent@example.invalid" } else { [string]$Config.gitUserEmail }
   defaultMainFirmware = $mainFirmwareRel
   defaultXvfTestFirmware = $xvfFirmwareRel
   defaultCamFirmware = $camFirmwareRel
