@@ -59,7 +59,21 @@ F:\work\2026\codex\XuanXuan\_remotes\student-remote-debug.git
 
 ## 推送到公网远端
 
-创建公网远端仓库后，分别执行：
+当前环境已经准备好两个本地 Git 仓库和两个本地 bare remote。公网仓库创建好以后，推荐直接运行自动化脚本：
+
+```powershell
+.\scripts\publish_git_repositories.cmd
+```
+
+它会完成：
+
+- 设置完整项目仓库的 `origin`
+- 设置学生/远程调试仓库的 `origin`
+- 把学生启动包里的 `repoUrl` 写成学生/远程调试仓库 URL
+- 重新生成学生启动包校验清单和 zip
+- 分别提交并 push 两个仓库
+
+也可以手动执行：
 
 ```powershell
 git remote add origin <完整项目仓库URL>
