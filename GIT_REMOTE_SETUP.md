@@ -12,11 +12,7 @@
 F:\work\2026\codex\XuanXuan
 ```
 
-当前本地提交：
-
-```text
-1649320 Prepare smart door eye project repository
-```
+当前提交以 `git log --oneline -1` 为准。
 
 临时本地 bare remote：
 
