@@ -173,14 +173,16 @@ void handlePIR() {
         } else if (!pirTriggered && (millis() - lastPIRHighTime >= PIR_HOLD_TIME)) {
             pirTriggered = true;
             logInfo("PIR", "HOLD_REACHED", String("hold_ms=") + (millis() - lastPIRHighTime) + " capture_count=3");
+            // 功能需求：PIR 异常逗留后应尽快发出声音威慑。
+            // 因此先启动 3 首吵架音队列，再尝试拍照；即使 CAM 当前故障，音频测试也不被拖住。
+            playRandomQuarrelSequence(3);
             // 连续拍 3 张：每一张都会走 takePhotoAndProcess()，
             // 即拍照 -> Base64 -> 百度人脸识别。
             for (int i = 0; i < 3; i++) {
                 takePhotoAndProcess(i);
+                audioLoop();
                 delay(500);
             }
-            // 随机顺序播放 3 首吵架音，作为异常逗留时的声音响应。
-            playRandomQuarrelSequence(3);
         }
     } else {
         if (pirWasHigh) {
@@ -207,10 +209,10 @@ void handleButton() {
         if (currentState == LOW && !buttonTriggered) {
             buttonTriggered = true;
             logInfo("BUTTON", "DOORBELL_PRESSED", "pin=18 state=LOW");
-            // 门铃按下后抓拍一张，并上传百度识别。
-            takePhotoAndProcess(0);
-            // 同时播放门铃提示音。
+            // 功能需求：访客按门铃后，提示音应立即响应，让现场能先确认按键和音频链路。
+            // 拍照/百度识别随后执行；CAM 故障时会使用模拟图，不会阻塞其它测试太久。
             playDoorbell();
+            takePhotoAndProcess(0);
 
             // Blynk 通知是辅助功能：如果 Blynk 未连接，包装函数会自动跳过。
             blynkVirtualWrite(VPIN_NOTIFY_TITLE, "Doorbell");

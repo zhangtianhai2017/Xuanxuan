@@ -60,6 +60,14 @@ extern const char* baidu_secret_key;
 #define CAMERA_BAUD_RATE    115200
 #define MAX_IMAGE_SIZE      65536
 
+// CAM 故障隔离参数，主要服务于异地课堂调试。
+// 临时飞线、供电接触不良或 CAM 未启动时，每次拍照都可能让主控等待很多秒。
+// 进入短暂退避后，PIR、门铃、WiFi、Blynk 和音频还能继续被测试，不会被坏 CAM 拖住。
+#define CAMERA_CAPTURE_ENABLED              true
+#define CAMERA_MOCK_IMAGE_ON_FAILURE        true
+#define CAMERA_FAILURE_BACKOFF_THRESHOLD    1
+#define CAMERA_FAILURE_BACKOFF_MS           60000UL
+
 // Blynk 虚拟引脚：手机端按钮/通知控件会和这些编号对应。
 #define VPIN_REMOTE_CAPTURE  1
 #define VPIN_PLAY_QUARREL    2
