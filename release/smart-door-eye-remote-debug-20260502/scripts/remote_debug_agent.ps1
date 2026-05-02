@@ -199,9 +199,10 @@ function Invoke-EsptoolToLog {
   if (-not (Test-Path $esptool)) {
     throw "esptool.exe not found: $esptool"
   }
-  ">>> esptool $($ToolArgs -join ' ')" | Tee-Object -FilePath $ResultLog -Append
+  ">>> esptool $($ToolArgs -join ' ')" | Tee-Object -FilePath $ResultLog -Append | Out-Null
   & $esptool @ToolArgs *>&1 | Tee-Object -FilePath $ResultLog -Append | Out-Null
-  return $LASTEXITCODE
+  $toolExitCode = [int]$LASTEXITCODE
+  return $toolExitCode
 }
 
 function Close-XiaoSerial {
