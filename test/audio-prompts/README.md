@@ -6,7 +6,7 @@ This folder stores short voice prompts used by the remote debug firmware.
 
 - File: `please_press_doorbell_button.wav`
 - Text: `请配合测试，请按一下门铃按钮。`
-- Format: WAV, 44.1 kHz, 16-bit, stereo
+- Format: WAV, 22.05 kHz, 16-bit, mono
 - Raw URL: `https://raw.githubusercontent.com/zhangtianhai2017/Xuanxuan/main/test/audio-prompts/please_press_doorbell_button.wav`
 
 The main firmware plays this prompt while the remote button test is waiting for
