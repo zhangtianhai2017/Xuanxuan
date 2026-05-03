@@ -1,4 +1,4 @@
-param(
+﻿param(
   [string]$ConfigPath = ""
 )
 
@@ -44,6 +44,35 @@ function Invoke-Git {
   if ($LASTEXITCODE -ne 0) {
     throw "$FailureMessage exit=$LASTEXITCODE"
   }
+}
+
+function Repair-StaleGitRebase {
+  param([string]$WorkDir)
+
+  $gitDir = Join-Path $WorkDir ".git"
+  $rebaseMerge = Join-Path $gitDir "rebase-merge"
+  $rebaseApply = Join-Path $gitDir "rebase-apply"
+  if (-not ((Test-Path $rebaseMerge) -or (Test-Path $rebaseApply))) {
+    return
+  }
+
+  # 现场远程调试时，学生可能会在 Git 正在 pull/push 日志时拔线、断电或关闭窗口。
+  # 这会留下 rebase 临时状态，让后续自动更新和日志上传一直失败。先尝试 abort，
+  # 如果 Git 只剩空的临时目录，再清掉这个目录，让仓库恢复到可继续同步的状态。
+  Write-Host "Detected unfinished Git rebase state. Trying to recover..."
+  & git -C $WorkDir rebase --abort 2>$null
+  if ($LASTEXITCODE -eq 0) {
+    Write-Host "Git rebase state recovered by rebase --abort."
+    return
+  }
+
+  if (Test-Path $rebaseMerge) {
+    Remove-Item -LiteralPath $rebaseMerge -Recurse -Force -ErrorAction SilentlyContinue
+  }
+  if (Test-Path $rebaseApply) {
+    Remove-Item -LiteralPath $rebaseApply -Recurse -Force -ErrorAction SilentlyContinue
+  }
+  Write-Host "Removed stale Git rebase state directories."
 }
 
 function Set-LocalGitIdentity {
@@ -122,6 +151,7 @@ Write-Host "xiaoPort=$xiaoPort"
 
 if (Test-Path (Join-Path $repoRoot ".git")) {
   Write-Step "Updating existing Git repository"
+  Repair-StaleGitRebase -WorkDir $repoRoot
   Invoke-Git -GitArgs @("-C", $repoRoot, "pull", "--rebase", "--autostash") -FailureMessage "git pull failed"
 } else {
   if ($repoUrlNeedsTeacher) {
@@ -196,6 +226,7 @@ do {
   }
   if ($agentExitCode -eq $restartExitCode) {
     Write-Step "Agent updated itself; restarting"
+    Repair-StaleGitRebase -WorkDir $repoRoot
     Invoke-Git -GitArgs @("-C", $repoRoot, "pull", "--rebase", "--autostash") -FailureMessage "git pull before agent restart failed"
     Start-Sleep -Seconds 2
   }

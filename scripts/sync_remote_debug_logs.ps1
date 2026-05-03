@@ -1,4 +1,4 @@
-param(
+﻿param(
   [string]$DeviceId = "smart-door-eye-lab-01",
   [int]$Tail = 80,
   [switch]$NoPull
@@ -8,8 +8,35 @@ $ErrorActionPreference = "Stop"
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 Set-Location $RepoRoot
 
+function Repair-StaleGitRebase {
+  param([string]$WorkDir)
+
+  $gitDir = Join-Path $WorkDir ".git"
+  $rebaseMerge = Join-Path $gitDir "rebase-merge"
+  $rebaseApply = Join-Path $gitDir "rebase-apply"
+  if (-not ((Test-Path $rebaseMerge) -or (Test-Path $rebaseApply))) {
+    return
+  }
+
+  Write-Host "Detected unfinished Git rebase state. Trying to recover..."
+  & git -C $WorkDir rebase --abort 2>$null
+  if ($LASTEXITCODE -eq 0) {
+    Write-Host "Git rebase state recovered by rebase --abort."
+    return
+  }
+
+  if (Test-Path $rebaseMerge) {
+    Remove-Item -LiteralPath $rebaseMerge -Recurse -Force -ErrorAction SilentlyContinue
+  }
+  if (Test-Path $rebaseApply) {
+    Remove-Item -LiteralPath $rebaseApply -Recurse -Force -ErrorAction SilentlyContinue
+  }
+  Write-Host "Removed stale Git rebase state directories."
+}
+
 if (-not $NoPull) {
   Write-Host "git pull --rebase --autostash"
+  Repair-StaleGitRebase -WorkDir $RepoRoot
   & git pull --rebase --autostash
   if ($LASTEXITCODE -ne 0) {
     throw "git pull failed exit=$LASTEXITCODE"

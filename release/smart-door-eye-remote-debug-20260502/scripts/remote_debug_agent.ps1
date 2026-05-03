@@ -1,4 +1,4 @@
-param(
+﻿param(
   [string]$ConfigPath = ""
 )
 
@@ -48,6 +48,39 @@ function Resolve-RepoPath {
   return Join-Path $RepoRoot $PathValue
 }
 
+function Repair-StaleGitRebase {
+  param([string]$WorkDir)
+
+  $gitDir = Join-Path $WorkDir ".git"
+  $rebaseMerge = Join-Path $gitDir "rebase-merge"
+  $rebaseApply = Join-Path $gitDir "rebase-apply"
+  $hasRebaseState = (Test-Path $rebaseMerge) -or (Test-Path $rebaseApply)
+  if (-not $hasRebaseState) {
+    return
+  }
+
+  # 远程调试 Agent 会频繁 pull/push 日志。现场电脑断电、拔 USB 或关闭窗口时，
+  # Git 可能留下 rebase-merge / rebase-apply 临时目录，之后每次 pull 都会失败。
+  # 对这个教学项目来说，现场本地只应产生日志提交；先 abort 可以回到可同步状态，
+  # 避免因为 Git 的中间状态而丢失后续硬件调试日志。
+  Write-AgentLog "git_rebase_state_found action=abort"
+  & git -C $WorkDir rebase --abort 2>$null
+  if ($LASTEXITCODE -eq 0) {
+    Write-AgentLog "git_rebase_abort_ok"
+    return
+  }
+
+  # 有时 Git 已经没有可 abort 的 rebase，但临时目录还留着。此时只删除 Git
+  # 的 rebase 状态目录，不删除项目文件和日志文件。
+  if (Test-Path $rebaseMerge) {
+    Remove-Item -LiteralPath $rebaseMerge -Recurse -Force -ErrorAction SilentlyContinue
+  }
+  if (Test-Path $rebaseApply) {
+    Remove-Item -LiteralPath $rebaseApply -Recurse -Force -ErrorAction SilentlyContinue
+  }
+  Write-AgentLog "git_rebase_state_removed"
+}
+
 function Invoke-GitSync {
   param([string]$Message)
 
@@ -57,6 +90,7 @@ function Invoke-GitSync {
     return
   }
 
+  Repair-StaleGitRebase -WorkDir $RepoRoot
   & git -C $RepoRoot pull --rebase --autostash
   if ($LASTEXITCODE -ne 0) {
     Write-Warning "git pull failed; continuing local logging."
@@ -417,6 +451,7 @@ function Invoke-FlashCommand {
 
 function Poll-RemoteCommand {
   try {
+    Repair-StaleGitRebase -WorkDir $RepoRoot
     & git -C $RepoRoot pull --rebase --autostash
     if (Test-AgentSelfUpdate) {
       return
