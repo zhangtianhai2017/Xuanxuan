@@ -1,0 +1,6 @@
+﻿2026-05-03T19:52:25.5383301+08:00 [AGENT] agent_start deviceId=smart-door-eye-lab-01 repoRoot=C:\Users\dengw\Documents\XuanXuan-smart-door-eye-20260503_193720 xiaoPort=AUTO autoDetectXiaoPort=True
+2026-05-03T19:52:26.3703025+08:00 [AGENT] serial_auto_detect preferred=AUTO selected=COM7 inventory=COM3:蓝牙链接上的标准串行_(COM3),COM4:蓝牙链接上的标准串行_(COM4),COM5:蓝牙链接上的标准串行_(COM5),COM6:蓝牙链接上的标准串行_(COM6),COM7:USB_串行设备_(COM7)
+2026-05-03T19:52:26.3795506+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-03T19:52:30.3813566+08:00 [AGENT] command_start id=20260503-194705-flash_main_fixed_agent action=flash_main
+2026-05-03T19:52:39.9041284+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-03T19:52:39.9081281+08:00 [AGENT] command_failed id=20260503-194705-flash_main_fixed_agent error=
