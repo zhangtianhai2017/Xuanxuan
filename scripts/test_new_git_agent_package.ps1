@@ -58,6 +58,8 @@ function Test-AgentPortReturnIsClean {
   Assert-True -Condition ($agentText -match 'Invoke-XiaoEsp32C6FlashToLog') -Message "Agent must use XIAO ESP32C6 flash reset fallback."
   Assert-True -Condition ($agentText -match 'usb-reset') -Message "Agent must try usb-reset for XIAO ESP32C6 native USB flashing."
   Assert-True -Condition ($agentText -notmatch 'Tee-Object\s+-FilePath\s+\$ResultLog') -Message "esptool result logs must stay plain UTF-8 text."
+  Assert-True -Condition ($agentText -match '\$script:Serial\.DtrEnable\s*=\s*\$false') -Message "Serial logging must not assert DTR."
+  Assert-True -Condition ($agentText -match '\$script:Serial\.RtsEnable\s*=\s*\$false') -Message "Serial logging must not assert RTS."
 
   $tempDir = Join-Path "C:\tmp" ("smart-door-eye-agent-return-test-" + (Get-Date -Format "yyyyMMddHHmmssfff"))
   New-Item -ItemType Directory -Force $tempDir | Out-Null

@@ -506,8 +506,12 @@ function Open-XiaoSerial {
       $script:Serial = New-Object System.IO.Ports.SerialPort $script:XiaoPort, $XiaoBaud, "None", 8, "One"
       $script:Serial.Encoding = [System.Text.Encoding]::ASCII
       $script:Serial.ReadTimeout = 1000
-      $script:Serial.DtrEnable = $true
-      $script:Serial.RtsEnable = $true
+      # 普通日志读取只需要接收 XIAO 的 USB 串口文本，不应该控制复位脚。
+      # 很多 ESP32 开发板会把 DTR/RTS 接到自动下载/复位电路；如果 Agent
+      # 每次重连串口都拉动 DTR/RTS，现场按 RESET 后可能马上又被电脑重置，
+      # 造成日志里连续出现 ESP-ROM 启动信息。刷写时仍由 esptool 专门控制复位。
+      $script:Serial.DtrEnable = $false
+      $script:Serial.RtsEnable = $false
       $script:Serial.Open()
       Write-AgentLog "serial_open port=$script:XiaoPort baud=$XiaoBaud attempt=$attempt"
       return $true
