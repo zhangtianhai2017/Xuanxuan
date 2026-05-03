@@ -121,6 +121,27 @@ function Repair-StaleGitIndexLock {
   Write-AgentLog "git_index_lock_removed age_s=$ageSeconds path=$lockPath"
 }
 
+function Remove-OversizedDebugLogs {
+  if ([string]::IsNullOrWhiteSpace($DeviceLogDir) -or -not (Test-Path $DeviceLogDir)) {
+    return
+  }
+
+  $maxBytes = [int64]$Config.maxGitLogFileBytes
+  if ($maxBytes -le 0) {
+    $maxBytes = 8388608
+  }
+
+  Get-ChildItem -LiteralPath $DeviceLogDir -Recurse -File -ErrorAction SilentlyContinue |
+    Where-Object { $_.Length -gt $maxBytes } |
+    ForEach-Object {
+      # GitHub 单文件硬限制是 100MB。现场调试日志如果异常膨胀，继续提交只会
+      # 让 push 永远失败。这里直接删除超限日志，让 Agent 保持可远程更新和可上传
+      # 后续小日志；真正的历史大日志不作为本项目的调试目标。
+      Write-Host "Removing oversized debug log from Git sync: $($_.FullName) bytes=$($_.Length)"
+      Remove-Item -LiteralPath $_.FullName -Force -ErrorAction SilentlyContinue
+    }
+}
+
 function Invoke-GitSync {
   param([string]$Message)
 
@@ -139,6 +160,8 @@ function Invoke-GitSync {
   Test-AgentSelfUpdate | Out-Null
 
   Ensure-GitIdentity
+
+  Remove-OversizedDebugLogs
 
   Repair-StaleGitIndexLock -WorkDir $RepoRoot
   & git -C $RepoRoot add -- $RelDeviceLogDir
@@ -192,7 +215,13 @@ function Ensure-GitIdentity {
 function Write-AgentLog {
   param([string]$Line)
   $out = "$(Get-Date -Format o) [AGENT] $Line"
-  $out | Tee-Object -FilePath $AgentLogFile -Append
+  # PowerShell 函数会把没有接住的管道输出当作“返回值”。这个 Agent
+  # 有些函数会一边写日志一边返回 COM 口名，例如 Resolve-XiaoPort 返回
+  # "COM7" 给 esptool 的 --port 参数。如果这里直接 Tee-Object，日志文本
+  # 会混进返回值，导致刷写命令把整行日志当成端口名。这里显式写文件和
+  # 控制台，不向函数调用者返回任何内容。
+  Add-Content -Encoding UTF8 -LiteralPath $AgentLogFile -Value $out
+  Write-Host $out
 }
 
 function Get-SerialPortInventory {

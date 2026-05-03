@@ -1,5 +1,5 @@
 ﻿{
-    "id":  "20260503-171432-flash_main_cam_fallback_prompt",
+    "id":  "20260503-194705-flash_main_fixed_agent",
     "action":  "flash_main",
     "firmware":  "release/smart-door-eye-remote-debug-20260502/firmware/main_xiao_esp32c6/smartdooreye.ino.merged.bin",
     "erase":  true
