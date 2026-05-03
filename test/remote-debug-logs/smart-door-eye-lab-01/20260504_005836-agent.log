@@ -1,0 +1,5 @@
+﻿2026-05-04T00:58:36.3359961+08:00 [AGENT] agent_start deviceId=smart-door-eye-lab-01 repoRoot=C:\Users\dengw\Documents\XuanXuan-smart-door-eye-20260504_005826 xiaoPort=AUTO autoDetectXiaoPort=True
+2026-05-04T00:58:43.5603848+08:00 [AGENT] serial_auto_detect preferred=AUTO selected=COM7 inventory=COM3:蓝牙链接上的标准串行_(COM3),COM4:蓝牙链接上的标准串行_(COM4),COM5:蓝牙链接上的标准串行_(COM5),COM6:蓝牙链接上的标准串行_(COM6),COM7:USB_串行设备_(COM7)
+2026-05-04T00:58:43.5845151+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T00:59:44.7573000+08:00 [AGENT] git_config_set key=user.name value="Smart Door Eye Remote Agent"
+2026-05-04T00:59:44.8604107+08:00 [AGENT] git_config_set key=user.email value="smart-door-eye-agent@example.invalid"
