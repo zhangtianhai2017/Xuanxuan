@@ -18,8 +18,8 @@
 2. Arduino CLI 配置文件：`F:\work\2026\codex\XuanXuan\arduino-cli.yaml`。
 3. 已安装并验证的 ESP32 Arduino core：`esp32:esp32 3.3.8`。
 4. 主控 XIAO ESP32C6 的编译 FQBN 必须使用：`esp32:esp32:XIAO_ESP32C6:PartitionScheme=huge_app`。
-5. 必须使用 `HUGE_APP` 分区。当前主控固件已经超过默认 app 分区容量，默认分区会编译失败或无法烧录完整应用；`huge_app` 下已验证可编译通过。
-6. Arduino 要求草图目录名和 `.ino` 文件同名。本项目主控源码目录名是中文 `主程序`，而主草图是 `smartdooreye.ino`，所以本地编译时要复制一份到临时目录，例如 `C:\tmp\smartdooreye_build_YYYYMMDD_HHMMSS\smartdooreye\smartdooreye.ino`。这样可以满足 Arduino 规则，同时不改项目结构。
+5. 必须使用 `HUGE_APP` 分区。当前主控固件已经超过默认 app 分区容量；`huge_app` 下已验证可编译通过。
+6. Arduino 要求草图目录名和 `.ino` 文件同名。本项目主控源代码目录是中文 `主程序`，而主草图是 `smartdooreye.ino`，所以本地编译时要复制一份到临时目录，例如 `C:\tmp\smartdooreye_build_YYYYMMDD_HHMMSS\smartdooreye\smartdooreye.ino`。这样可以满足 Arduino 规则，同时不改项目结构。
 7. 已验证的主控编译命令示例：
 
    ```powershell
@@ -45,3 +45,19 @@
    - `MANIFEST_SHA256.txt`
 8. 编译通过的关键判断不是只看命令退出，还要确认日志里出现程序占用信息，例如 `Sketch uses ... bytes`，并且没有分区容量错误。
 9. 这一轮已验证的构建重点：Baidu 上传修复只改了主控代码，使用 `huge_app` 后编译通过；发布时更新主控 bin、merged bin 和校验清单即可，不需要重新处理 ESP32-CAM 固件。
+
+## 远程现场调试反复踩坑记录
+
+这些规则来自本项目 2026-05-03 的现场远程调试。后续 Agent 必须优先遵守，避免再次浪费现场时间。
+
+1. 如果用户要求“新的 ZIP 包”“不要管以前的东西”“不用发过去”，就只在本机生成一个新的独立 ZIP 包，不再尝试通过 Git 更新现场旧 Agent。
+2. 给现场同学的包必须是最小操作：解压、双击 `start_remote_debug.cmd`、窗口保持打开。不要让现场同学执行复杂 Git 命令，除非用户明确要求。
+3. 新 Agent 包必须新建一个全新的项目目录，不读取、不修复、不上传旧目录里的日志和旧状态。
+4. 新 Agent 第一次启动时，必须把仓库里当前已有的 `test/remote-debug-commands/<device>/command.json` 记录为“已处理”，避免一启动就重复执行上一轮 `flash_main` 烧写命令。
+5. 打包前必须本机测试启动脚本，至少验证：能 clone 到临时新目录、能生成 Agent 配置、能写入 `last_command_id.txt`、能用 `-SkipAgentStart` 跳过真正启动。
+6. 旧日志不要进入新包，也不要为了“保留历史”上传超大日志。远程日志只保留用于当前判断的短结论；压缩上下文或写记忆时不要保存大段现场原始 log。
+7. 如果 GitHub 拒绝 push 是因为历史日志超过 100MB，不要继续围绕旧仓库状态让现场处理。优先给新的干净 ZIP 包，恢复调试链路。
+8. 当串口日志显示 `PLAY_START` / `PLAY_DONE` 时，只能说明软件已经发起播放流程；如果现场听不到声音，仍然要判断 reSpeaker、喇叭、I2S 接线、供电或音量等硬件输出问题，不能直接说“现场已经播放成功”。
+9. 回答现场状态时要直接给结论：主控、WiFi、PIR、Baidu、CAM、门铃、音频软件流程分别是否正常。不要把大段日志贴给用户。
+10. 用户已经明确反感反复复杂化流程。遇到可用 ZIP 解决的问题，优先给 ZIP 路径和唯一运行入口，不再展开多套方案。
+11. Agent 本身不允许自更新，也不允许运行中检测到脚本变化后自动重启。这个机制在现场调试中过于复杂且危险：旧窗口会停在 pause，新旧状态可能交叉，还可能重新读到历史命令。以后更新 Agent 只允许重新生成新的 ZIP 包，由现场明确手动启动。

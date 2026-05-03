@@ -275,6 +275,25 @@ function Format-SerialPortInventory {
   }) -join ",")
 }
 
+function Normalize-SerialPortName {
+  param([string]$Value)
+
+  if ([string]::IsNullOrWhiteSpace($Value)) {
+    return ""
+  }
+
+  # 远程 Agent 运行在 Windows PowerShell 里。PowerShell 函数如果不小心把日志
+  # 文本写入了返回管道，调用者拿到的可能不是单纯的 "COM7"，而是
+  # "... selected=COM7 ... COM7" 这样的整段文本。串口库只接受纯 COM 口名，
+  # 所以这里从字符串里提取最后一个 COM 数字，避免日志污染让串口打不开。
+  $matches = [regex]::Matches($Value, 'COM\d+', [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+  if ($matches.Count -gt 0) {
+    return $matches[$matches.Count - 1].Value.ToUpperInvariant()
+  }
+
+  return $Value.Trim()
+}
+
 function Resolve-XiaoPort {
   param([string]$PreferredPort)
 
@@ -330,18 +349,9 @@ function Get-AgentScriptHash {
 }
 
 function Test-AgentSelfUpdate {
-  $autoRestart = $Config.autoRestartOnAgentUpdate -ne $false
-  if (-not $autoRestart -or $script:AgentRestartRequested) {
-    return $false
-  }
-  $currentHash = Get-AgentScriptHash
-  if (-not [string]::IsNullOrWhiteSpace($script:InitialAgentScriptHash) -and
-      -not [string]::IsNullOrWhiteSpace($currentHash) -and
-      $currentHash -ne $script:InitialAgentScriptHash) {
-    $script:AgentRestartRequested = $true
-    Write-AgentLog "agent_update_detected action=restart script=$AgentScriptPath"
-    return $true
-  }
+  # Agent 自更新在现场远程调试中风险太高：它会让旧窗口停在 pause、
+  # 新旧脚本状态交叉，还可能重新读取历史命令。后续 Agent 更新只允许通过
+  # 老师重新发一个新的 ZIP 包，现场同学手动启动；运行中的 Agent 不自我替换。
   return $false
 }
 
@@ -499,7 +509,7 @@ function Open-XiaoSerial {
   Close-XiaoSerial
   for ($attempt = 1; $attempt -le $Retries; $attempt++) {
     try {
-      $resolvedPort = Resolve-XiaoPort -PreferredPort $script:XiaoPort
+      $resolvedPort = Normalize-SerialPortName (Resolve-XiaoPort -PreferredPort $script:XiaoPort)
       if (-not [string]::IsNullOrWhiteSpace($resolvedPort)) {
         $script:XiaoPort = $resolvedPort
       }
