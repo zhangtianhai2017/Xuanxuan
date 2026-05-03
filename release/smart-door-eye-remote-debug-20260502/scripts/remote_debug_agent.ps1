@@ -81,6 +81,46 @@ function Repair-StaleGitRebase {
   Write-AgentLog "git_rebase_state_removed"
 }
 
+function Repair-StaleGitIndexLock {
+  param([string]$WorkDir)
+
+  $lockPath = Join-Path (Join-Path $WorkDir ".git") "index.lock"
+  if (-not (Test-Path $lockPath)) {
+    return
+  }
+
+  $lock = Get-Item -LiteralPath $lockPath -ErrorAction SilentlyContinue
+  if ($null -eq $lock) {
+    return
+  }
+  $ageSeconds = [int]((Get-Date) - $lock.LastWriteTime).TotalSeconds
+  if ($ageSeconds -lt 30) {
+    Write-AgentLog "git_index_lock_present action=wait age_s=$ageSeconds"
+    return
+  }
+
+  $runningGit = @()
+  try {
+    $runningGit = @(Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object {
+      $_.Name -match '^(git|git-remote-https|ssh)\.exe$' -and
+      ([string]$_.CommandLine) -like "*$WorkDir*"
+    })
+  } catch {
+    $runningGit = @()
+  }
+
+  if ($runningGit.Count -gt 0) {
+    Write-AgentLog "git_index_lock_present action=keep running_git=$($runningGit.Count) age_s=$ageSeconds"
+    return
+  }
+
+  # index.lock 是 Git 为保护索引文件创建的临时锁。现场如果强行关闭窗口，
+  # 锁文件可能留下来，之后 git pull/add/commit 都会失败。这里确认锁文件
+  # 已经不是刚创建的、且没有正在运行的 Git 进程后才删除它。
+  Remove-Item -LiteralPath $lockPath -Force -ErrorAction SilentlyContinue
+  Write-AgentLog "git_index_lock_removed age_s=$ageSeconds path=$lockPath"
+}
+
 function Invoke-GitSync {
   param([string]$Message)
 
@@ -91,6 +131,7 @@ function Invoke-GitSync {
   }
 
   Repair-StaleGitRebase -WorkDir $RepoRoot
+  Repair-StaleGitIndexLock -WorkDir $RepoRoot
   & git -C $RepoRoot pull --rebase --autostash
   if ($LASTEXITCODE -ne 0) {
     Write-Warning "git pull failed; continuing local logging."
@@ -99,6 +140,7 @@ function Invoke-GitSync {
 
   Ensure-GitIdentity
 
+  Repair-StaleGitIndexLock -WorkDir $RepoRoot
   & git -C $RepoRoot add -- $RelDeviceLogDir
   if ($LASTEXITCODE -ne 0) {
     Write-Warning "git add failed."
@@ -452,6 +494,7 @@ function Invoke-FlashCommand {
 function Poll-RemoteCommand {
   try {
     Repair-StaleGitRebase -WorkDir $RepoRoot
+    Repair-StaleGitIndexLock -WorkDir $RepoRoot
     & git -C $RepoRoot pull --rebase --autostash
     if (Test-AgentSelfUpdate) {
       return

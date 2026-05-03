@@ -34,9 +34,47 @@ function Repair-StaleGitRebase {
   Write-Host "Removed stale Git rebase state directories."
 }
 
+function Repair-StaleGitIndexLock {
+  param([string]$WorkDir)
+
+  $lockPath = Join-Path (Join-Path $WorkDir ".git") "index.lock"
+  if (-not (Test-Path $lockPath)) {
+    return
+  }
+
+  $lock = Get-Item -LiteralPath $lockPath -ErrorAction SilentlyContinue
+  if ($null -eq $lock) {
+    return
+  }
+  $ageSeconds = [int]((Get-Date) - $lock.LastWriteTime).TotalSeconds
+  if ($ageSeconds -lt 30) {
+    Write-Host "Git index.lock exists and is recent; waiting for the current Git operation to finish."
+    return
+  }
+
+  $runningGit = @()
+  try {
+    $runningGit = @(Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object {
+      $_.Name -match '^(git|git-remote-https|ssh)\.exe$' -and
+      ([string]$_.CommandLine) -like "*$WorkDir*"
+    })
+  } catch {
+    $runningGit = @()
+  }
+
+  if ($runningGit.Count -gt 0) {
+    Write-Host "Git index.lock exists, but another Git process seems to be running. Keeping the lock file."
+    return
+  }
+
+  Remove-Item -LiteralPath $lockPath -Force -ErrorAction SilentlyContinue
+  Write-Host "Removed stale Git index.lock: $lockPath"
+}
+
 if (-not $NoPull) {
   Write-Host "git pull --rebase --autostash"
   Repair-StaleGitRebase -WorkDir $RepoRoot
+  Repair-StaleGitIndexLock -WorkDir $RepoRoot
   & git pull --rebase --autostash
   if ($LASTEXITCODE -ne 0) {
     throw "git pull failed exit=$LASTEXITCODE"

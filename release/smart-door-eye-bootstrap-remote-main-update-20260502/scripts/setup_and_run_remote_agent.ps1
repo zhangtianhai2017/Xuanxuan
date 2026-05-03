@@ -75,6 +75,45 @@ function Repair-StaleGitRebase {
   Write-Host "Removed stale Git rebase state directories."
 }
 
+function Repair-StaleGitIndexLock {
+  param([string]$WorkDir)
+
+  $lockPath = Join-Path (Join-Path $WorkDir ".git") "index.lock"
+  if (-not (Test-Path $lockPath)) {
+    return
+  }
+
+  $lock = Get-Item -LiteralPath $lockPath -ErrorAction SilentlyContinue
+  if ($null -eq $lock) {
+    return
+  }
+  $ageSeconds = [int]((Get-Date) - $lock.LastWriteTime).TotalSeconds
+  if ($ageSeconds -lt 30) {
+    Write-Host "Git index.lock exists and is recent; waiting for the current Git operation to finish."
+    return
+  }
+
+  $runningGit = @()
+  try {
+    $runningGit = @(Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object {
+      $_.Name -match '^(git|git-remote-https|ssh)\.exe$' -and
+      ([string]$_.CommandLine) -like "*$WorkDir*"
+    })
+  } catch {
+    $runningGit = @()
+  }
+
+  if ($runningGit.Count -gt 0) {
+    Write-Host "Git index.lock exists, but another Git process seems to be running. Keeping the lock file."
+    return
+  }
+
+  # index.lock 是 Git 为保护索引文件创建的临时锁。现场强行关闭窗口时它可能残留，
+  # 导致后续 git pull/add/commit 都失败。确认没有 Git 进程后再删除。
+  Remove-Item -LiteralPath $lockPath -Force -ErrorAction SilentlyContinue
+  Write-Host "Removed stale Git index.lock: $lockPath"
+}
+
 function Set-LocalGitIdentity {
   param(
     [string]$WorkDir,
@@ -152,6 +191,7 @@ Write-Host "xiaoPort=$xiaoPort"
 if (Test-Path (Join-Path $repoRoot ".git")) {
   Write-Step "Updating existing Git repository"
   Repair-StaleGitRebase -WorkDir $repoRoot
+  Repair-StaleGitIndexLock -WorkDir $repoRoot
   Invoke-Git -GitArgs @("-C", $repoRoot, "pull", "--rebase", "--autostash") -FailureMessage "git pull failed"
 } else {
   if ($repoUrlNeedsTeacher) {
@@ -227,6 +267,7 @@ do {
   if ($agentExitCode -eq $restartExitCode) {
     Write-Step "Agent updated itself; restarting"
     Repair-StaleGitRebase -WorkDir $repoRoot
+    Repair-StaleGitIndexLock -WorkDir $repoRoot
     Invoke-Git -GitArgs @("-C", $repoRoot, "pull", "--rebase", "--autostash") -FailureMessage "git pull before agent restart failed"
     Start-Sleep -Seconds 2
   }
