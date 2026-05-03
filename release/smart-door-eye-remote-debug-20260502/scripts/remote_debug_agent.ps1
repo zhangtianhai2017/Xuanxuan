@@ -405,15 +405,37 @@ function Invoke-EsptoolToLog {
   $cmdLine = ">>> esptool $($ToolArgs -join ' ')"
   Add-Content -Encoding UTF8 -LiteralPath $ResultLog -Value $cmdLine
   Write-Host $cmdLine
-  & $esptool @ToolArgs *>&1 | ForEach-Object {
-    # 不用 Tee-Object 写刷机日志。Windows PowerShell 的 Tee-Object 在某些
-    # 输出组合下会把文件写成带 NUL 的 UTF-16 片段，远程查看很难读。逐行
-    # Add-Content 可以保证 command-result 日志是普通 UTF-8 文本。
-    $line = [string]$_
+
+  # 不直接用 `& esptool 2>&1 | ...`。在 Windows PowerShell 里，外部
+  # 程序的 stderr 可能被 ErrorActionPreference=Stop 变成异常，导致
+  # Agent 还没拿到退出码就跳出函数，后续 reset fallback 也不会执行。
+  # 这里用 .NET Process 明确捕获 stdout/stderr，失败也能继续判断退出码。
+  $startInfo = New-Object System.Diagnostics.ProcessStartInfo
+  $startInfo.FileName = $esptool
+  $startInfo.Arguments = (($ToolArgs | ForEach-Object { ConvertTo-ProcessArgument ([string]$_) }) -join " ")
+  $startInfo.UseShellExecute = $false
+  $startInfo.RedirectStandardOutput = $true
+  $startInfo.RedirectStandardError = $true
+  $startInfo.CreateNoWindow = $true
+
+  $process = New-Object System.Diagnostics.Process
+  $process.StartInfo = $startInfo
+  [void]$process.Start()
+  $stdout = $process.StandardOutput.ReadToEnd()
+  $stderr = $process.StandardError.ReadToEnd()
+  $process.WaitForExit()
+
+  foreach ($line in (($stdout -split "`r?`n") | Where-Object { $_ -ne "" })) {
     Add-Content -Encoding UTF8 -LiteralPath $ResultLog -Value $line
     Write-Host $line
   }
-  $toolExitCode = [int]$LASTEXITCODE
+  foreach ($line in (($stderr -split "`r?`n") | Where-Object { $_ -ne "" })) {
+    $errLine = "stderr: $line"
+    Add-Content -Encoding UTF8 -LiteralPath $ResultLog -Value $errLine
+    Write-Host $errLine
+  }
+
+  $toolExitCode = [int]$process.ExitCode
   Add-Content -Encoding UTF8 -LiteralPath $ResultLog -Value "esptool_exit_code=$toolExitCode"
   return $toolExitCode
 }

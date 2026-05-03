@@ -1,5 +1,5 @@
 ﻿{
-    "id":  "20260503-195720-flash_main_reset_fallback",
+    "id":  "20260503-200720-flash_main_process_capture",
     "action":  "flash_main",
     "firmware":  "release/smart-door-eye-remote-debug-20260502/firmware/main_xiao_esp32c6/smartdooreye.ino.merged.bin",
     "erase":  true

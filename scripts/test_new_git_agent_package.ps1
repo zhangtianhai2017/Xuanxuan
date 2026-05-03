@@ -92,6 +92,45 @@ if (`$result.Count -ne 1 -or `$result[0] -ne "COM7") {
   }
 }
 
+function Test-EsptoolFailureIsLoggedWithoutThrow {
+  param([string]$AgentPath)
+
+  Write-Host "Testing esptool failure logging still returns an exit code..."
+  $tempDir = Join-Path "C:\tmp" ("smart-door-eye-esptool-test-" + (Get-Date -Format "yyyyMMddHHmmssfff"))
+  New-Item -ItemType Directory -Force $tempDir | Out-Null
+  try {
+    $tempScript = Join-Path $tempDir "test_esptool_logging.ps1"
+    $tempLog = Join-Path $tempDir "esptool-result.log"
+    $packageRoot = Join-Path $RepoRoot "release\smart-door-eye-remote-debug-20260502"
+    $escapedLog = $tempLog -replace "'", "''"
+    $escapedPackageRoot = $packageRoot -replace "'", "''"
+    $scriptText = @"
+`$ErrorActionPreference = "Stop"
+`$PackageRoot = '$escapedPackageRoot'
+$(Get-FunctionSource -Path $AgentPath -Name "ConvertTo-ProcessArgument")
+$(Get-FunctionSource -Path $AgentPath -Name "Invoke-EsptoolToLog")
+`$exitCode = Invoke-EsptoolToLog -ToolArgs @("--definitely-invalid-option-for-test") -ResultLog '$escapedLog'
+if (`$exitCode -eq 0) {
+  throw "Expected esptool to fail for an invalid option."
+}
+"@
+    Set-Content -Encoding UTF8 -LiteralPath $tempScript -Value $scriptText
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $tempScript
+    if ($LASTEXITCODE -ne 0) {
+      throw "esptool failure logging test failed, exit=$LASTEXITCODE"
+    }
+
+    $bytes = [System.IO.File]::ReadAllBytes($tempLog)
+    Assert-True -Condition (-not ($bytes -contains 0)) -Message "esptool result log must not contain NUL bytes."
+    $logText = Get-Content -Raw -Encoding UTF8 $tempLog
+    Assert-True -Condition ($logText -match 'esptool_exit_code=') -Message "esptool result log must include exit code."
+  } finally {
+    if (Test-Path $tempDir) {
+      Remove-Item -LiteralPath $tempDir -Recurse -Force -ErrorAction SilentlyContinue
+    }
+  }
+}
+
 Write-Host "Testing package files..."
 Assert-File (Join-Path $PackageDir "start_remote_debug.cmd")
 Assert-File (Join-Path $PackageDir "start_new_git_agent.ps1")
@@ -103,6 +142,7 @@ Write-Host "Testing PowerShell syntax..."
 Test-PowerShellSyntax (Join-Path $PackageDir "start_new_git_agent.ps1")
 Test-PowerShellSyntax (Join-Path $PackageDir "remote_debug_agent.ps1")
 Test-AgentPortReturnIsClean (Join-Path $PackageDir "remote_debug_agent.ps1")
+Test-EsptoolFailureIsLoggedWithoutThrow (Join-Path $PackageDir "remote_debug_agent.ps1")
 
 Write-Host "Testing Git wrapper parameter names..."
 $launcherText = Get-Content -Raw -Encoding UTF8 (Join-Path $PackageDir "start_new_git_agent.ps1")
