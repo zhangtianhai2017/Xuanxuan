@@ -6,3 +6,9 @@
 2026-05-04T01:41:44.6958780+08:00 [AGENT] command_start id=20260504-013900-flash_main_field_prompt_queue_fix action=flash_main
 2026-05-04T01:42:07.9761756+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
 2026-05-04T01:42:07.9956416+08:00 [AGENT] command_ok id=20260504-013900-flash_main_field_prompt_queue_fix result=C:\Users\dengw\Documents\XuanXuan-smart-door-eye-20260504_005826\test\remote-debug-logs\smart-door-eye-lab-01\command-results\20260504-013900-flash_main_field_prompt_queue_fix-flash_main.log
+2026-05-04T05:19:15.1390038+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "The port 'COM7' does not exist."
+2026-05-04T05:19:22.8657952+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "The port 'COM7' does not exist."
+2026-05-04T05:19:30.6653536+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "The port 'COM7' does not exist."
+2026-05-04T05:19:39.2581569+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "The port 'COM7' does not exist."
+2026-05-04T05:19:47.0016239+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "The port 'COM7' does not exist."
+2026-05-04T05:19:54.7549524+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "The port 'COM7' does not exist."
