@@ -784,3 +784,21 @@
 2026-05-04T06:21:38.2766322+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
 "
 2026-05-04T06:21:44.7639876+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T06:21:52.8959660+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T06:21:54.5424895+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The device does not recognize the command.
+"
+2026-05-04T06:22:01.0416210+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T06:22:02.9681906+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T06:22:09.3992390+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T06:22:11.0462158+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T06:22:18.4401129+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T06:22:20.3661867+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T06:22:26.5473557+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T06:22:32.6177186+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T06:22:39.0521052+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T06:22:40.9767703+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T06:22:47.4686599+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
