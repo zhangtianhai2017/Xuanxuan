@@ -21,3 +21,4 @@
 2026-05-03T21:23:24.3589775+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
 2026-05-03T21:28:00.2104337+08:00 [AGENT] agent_update_detected action=restart script=C:\Users\dengw\Documents\XuanXuan-smart-door-eye-20260503_193720\release\smart-door-eye-remote-debug-20260502\scripts\remote_debug_agent.ps1
 2026-05-03T21:28:00.2149297+08:00 [AGENT] agent_stop reason=self_update
+2026-05-03T21:28:03.7948745+08:00 [AGENT] agent_replacement_started mode=direct script=C:\Users\dengw\Documents\XuanXuan-smart-door-eye-20260503_193720\release\smart-door-eye-remote-debug-20260502\scripts\remote_debug_agent.ps1
