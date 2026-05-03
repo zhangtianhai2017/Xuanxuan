@@ -1481,3 +1481,19 @@
 "
 2026-05-04T07:13:52.3087374+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
 2026-05-04T07:13:58.8091896+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T07:14:10.9148364+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T07:14:14.7565426+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T07:14:21.5300307+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T07:14:23.4568182+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T07:14:30.0459634+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T07:14:39.0767266+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T07:14:45.7729549+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T07:14:47.9835302+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T07:14:54.6247214+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T07:14:56.5501343+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T07:15:02.9687275+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
