@@ -268,3 +268,20 @@
 2026-05-04T05:45:05.0930646+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
 "
 2026-05-04T05:45:11.7878761+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T05:45:36.5109609+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T05:45:43.2083868+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T05:45:45.1321520+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T05:45:51.8456625+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T05:45:53.7578291+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T05:46:01.1989656+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T05:46:05.8879191+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T05:46:12.4642332+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "The port 'COM7' does not exist."
+2026-05-04T05:46:20.0436076+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "A device attached to the system is not functioning.
+"
+2026-05-04T05:46:28.4603077+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T05:46:30.3839597+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
