@@ -52,11 +52,16 @@ static int nextQuarrelSequenceIndex = 0;
 static const char* pendingAudioUrl = nullptr;
 static bool pendingAudioIsQuarrel = false;
 static bool pendingAudioIsDoorbell = false;
+// 现场测试提示音只是“引导同学检查硬件”的低优先级声音。
+// 单独记录这个标志，是为了后面能给提示音设置最长播放时间，避免网络音频卡住后一直占用 I2S 播放通道。
+static bool pendingAudioIsFieldPrompt = false;
 static AudioCodecKind activeAudioCodec = AUDIO_CODEC_MP3;
+static bool activeAudioIsFieldPrompt = false;
+static unsigned long audioStartedAt = 0;
 static FieldTestPrompt fieldPromptQueue[FIELD_TEST_PROMPT_QUEUE_SIZE];
 static uint8_t fieldPromptQueueCount = 0;
 
-static bool queueAudioFromUrl(const char* url, bool isQuarrel, bool isDoorbell);
+static bool queueAudioFromUrl(const char* url, bool isQuarrel, bool isDoorbell, bool isFieldPrompt = false);
 static bool startNextQueuedQuarrelTrack();
 static bool startNextQueuedFieldPrompt();
 
@@ -124,6 +129,8 @@ static void stopCurrentAudio() {
     isPlayingQuarrel = false;
     isPlayingDoorbell = false;
     activeAudioCodec = AUDIO_CODEC_MP3;
+    activeAudioIsFieldPrompt = false;
+    audioStartedAt = 0;
 }
 
 static bool urlEndsWith(const char* url, const char* suffix) {
@@ -137,12 +144,13 @@ static bool urlEndsWith(const char* url, const char* suffix) {
     return strcasecmp(url + urlLen - suffixLen, suffix) == 0;
 }
 
-static bool queueAudioFromUrl(const char* url, bool isQuarrel, bool isDoorbell) {
+static bool queueAudioFromUrl(const char* url, bool isQuarrel, bool isDoorbell, bool isFieldPrompt) {
     // 事件处理函数只负责“提出播放请求”，真正打开网络流放到 audioLoop()。
     // 这样 PIR/门铃可以先继续执行拍照流程，不会被 GitHub/raw 网络连接卡住数秒。
     pendingAudioUrl = url;
     pendingAudioIsQuarrel = isQuarrel;
     pendingAudioIsDoorbell = isDoorbell;
+    pendingAudioIsFieldPrompt = isFieldPrompt;
     logInfo("AUDIO", "PLAY_QUEUED", String("url=") + url);
     return true;
 }
@@ -184,7 +192,7 @@ static bool startNextQueuedFieldPrompt() {
     }
 
     logInfo("AUDIO", "FIELD_PROMPT_START", String("id=") + fieldPromptIds[prompt]);
-    return queueAudioFromUrl(fieldPromptUrls[prompt], false, false);
+    return queueAudioFromUrl(fieldPromptUrls[prompt], false, false, true);
 }
 
 void playFieldTestPrompt(FieldTestPrompt prompt) {
@@ -208,12 +216,28 @@ void playFieldTestPrompt(FieldTestPrompt prompt) {
     bool audioPathBusy = audioActive || pendingAudioUrl != nullptr || pendingQuarrelTracks > 0;
     if (!audioPathBusy && fieldPromptQueueCount == 0) {
         logInfo("AUDIO", "FIELD_PROMPT_REQUEST", String("id=") + fieldPromptIds[prompt] + " mode=direct");
-        queueAudioFromUrl(fieldPromptUrls[prompt], false, false);
+        queueAudioFromUrl(fieldPromptUrls[prompt], false, false, true);
+        return;
+    }
+
+    if (fieldPromptQueueCount > 0) {
+        // 现场提示是“当前该做什么”的语音，过期提示没有价值。
+        // 因此队列里已经有提示时，只保留最新一条，避免反复等待时把队列塞满。
+        FieldTestPrompt oldPrompt = fieldPromptQueue[0];
+        uint8_t oldCount = fieldPromptQueueCount;
+        fieldPromptQueue[0] = prompt;
+        fieldPromptQueueCount = 1;
+        logWarn("AUDIO", "FIELD_PROMPT_REPLACE",
+                String("old_id=") + fieldPromptIds[oldPrompt]
+                + " new_id=" + fieldPromptIds[prompt]
+                + " dropped=" + (oldCount - 1)
+                + " active=" + (audioActive ? 1 : 0)
+                + " pending_url=" + (pendingAudioUrl != nullptr ? 1 : 0));
         return;
     }
 
     if (fieldPromptQueueCount >= FIELD_TEST_PROMPT_QUEUE_SIZE) {
-        logWarn("AUDIO", "FIELD_PROMPT_QUEUE_FULL",
+        logWarn("AUDIO", "FIELD_PROMPT_DROP_NO_SLOT",
                 String("drop_id=") + fieldPromptIds[prompt]
                 + " count=" + fieldPromptQueueCount);
         return;
@@ -272,6 +296,7 @@ static bool startAudioFromUrl(const char* url) {
     audioActive = true;
     audioSawData = false;
     lastAudioDataTime = millis();
+    audioStartedAt = millis();
     logInfo("AUDIO", "PLAY_START",
             String("timeout_ms=") + AUDIO_HTTP_TIMEOUT_MS
             + " rssi=" + WiFi.RSSI()
@@ -306,16 +331,19 @@ static bool startPendingAudioIfNeeded() {
     const char* url = pendingAudioUrl;
     bool wasQuarrel = pendingAudioIsQuarrel;
     bool wasDoorbell = pendingAudioIsDoorbell;
+    bool wasFieldPrompt = pendingAudioIsFieldPrompt;
     pendingAudioUrl = nullptr;
 
     if (startAudioFromUrl(url)) {
         isPlayingQuarrel = wasQuarrel;
         isPlayingDoorbell = wasDoorbell;
+        activeAudioIsFieldPrompt = wasFieldPrompt;
         return true;
     }
 
     pendingAudioIsQuarrel = wasQuarrel;
     pendingAudioIsDoorbell = wasDoorbell;
+    pendingAudioIsFieldPrompt = wasFieldPrompt;
     handleQueuedAudioStartFailure();
     return false;
 }
@@ -354,8 +382,14 @@ void audioLoop() {
         return;
     }
 
-    size_t copied = (activeAudioCodec == AUDIO_CODEC_WAV) ? wavCopier.copy() : copier.copy();
-    if (copied > 0) {
+    // GitHub/raw 网络音频偶尔会卡在连接或流读取阶段。
+    // 对门铃声和吵架声不能随意截断，但现场测试提示音可以超时释放，让主流程继续检查按键、CAM、百度链路。
+    unsigned long playTimeBeforeCopy = millis() - audioStartedAt;
+    bool fieldPromptAlreadyTooLong = activeAudioIsFieldPrompt && playTimeBeforeCopy > FIELD_TEST_PROMPT_MAX_PLAY_MS;
+    size_t copied = fieldPromptAlreadyTooLong ? 0 : ((activeAudioCodec == AUDIO_CODEC_WAV) ? wavCopier.copy() : copier.copy());
+    unsigned long playTime = millis() - audioStartedAt;
+    bool fieldPromptTimedOut = fieldPromptAlreadyTooLong || (activeAudioIsFieldPrompt && playTime > FIELD_TEST_PROMPT_MAX_PLAY_MS);
+    if (copied > 0 && !fieldPromptTimedOut) {
         audioSawData = true;
         lastAudioDataTime = millis();
         return;
@@ -364,7 +398,7 @@ void audioLoop() {
     unsigned long idleTime = millis() - lastAudioDataTime;
     bool startTimedOut = !audioSawData && idleTime > AUDIO_START_TIMEOUT_MS;
     bool playbackEnded = audioSawData && idleTime > AUDIO_IDLE_ADVANCE_MS;
-    if (!startTimedOut && !playbackEnded) {
+    if (!startTimedOut && !playbackEnded && !fieldPromptTimedOut) {
         return;
     }
 
@@ -380,7 +414,11 @@ void audioLoop() {
             stopCurrentAudio();
         }
     } else {
-        logInfo("AUDIO", playbackEnded ? "PLAY_DONE" : "PLAY_START_TIMEOUT", String("idle_ms=") + idleTime);
+        const char* eventName = fieldPromptTimedOut ? "FIELD_PROMPT_PLAY_TIMEOUT" : (playbackEnded ? "PLAY_DONE" : "PLAY_START_TIMEOUT");
+        logInfo("AUDIO", eventName,
+                String("idle_ms=") + idleTime
+                + " play_ms=" + playTime
+                + " field_prompt=" + (activeAudioIsFieldPrompt ? 1 : 0));
         stopCurrentAudio();
     }
 }

@@ -80,6 +80,9 @@ extern const char* baidu_secret_key;
 // 这个功能专门服务异地调试：当门铃、PIR、CAM 等没有测到时，设备直接用语音提醒现场检查哪根线。
 #define FIELD_TEST_VOICE_GUIDE_ENABLED    true
 #define FIELD_TEST_PROMPT_QUEUE_SIZE      4
+// 现场语音提示是调试引导音，不是正式门铃/威慑音。
+// 超过这个时间仍未结束时主动释放音频通道，避免网络音频异常导致后续提示一直排队。
+#define FIELD_TEST_PROMPT_MAX_PLAY_MS     6000UL
 #define FIELD_TEST_NEXT_STEP_DELAY_MS     12000UL
 #define FIELD_TEST_PROBLEM_INTERVAL_MS    15000UL
 // CAM 失败后会自动用 GitHub 上的小真人图代替真实照片继续测试百度链路。

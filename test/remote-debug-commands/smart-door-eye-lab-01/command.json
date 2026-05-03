@@ -1,0 +1,7 @@
+﻿{
+    "id":  "20260504-013900-flash_main_field_prompt_queue_fix",
+    "action":  "flash_main",
+    "firmware":  "release/smart-door-eye-remote-debug-20260502/firmware/main_xiao_esp32c6/smartdooreye.ino.merged.bin",
+    "erase":  false,
+    "note":  "Fix FIELD_PROMPT_QUEUE_FULL: keep only latest field prompt and timeout stuck prompt playback."
+}
