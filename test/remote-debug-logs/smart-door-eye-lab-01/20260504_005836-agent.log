@@ -387,3 +387,19 @@
 "
 2026-05-04T05:54:40.7761489+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "The port 'COM7' does not exist."
 2026-05-04T05:54:48.2712652+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "The port 'COM7' does not exist."
+2026-05-04T05:55:00.1233316+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T05:55:06.0957709+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T05:55:08.0218617+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T05:55:14.6160831+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T05:55:16.5311444+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T05:55:23.0126708+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "The port 'COM7' does not exist."
+2026-05-04T05:55:33.6423363+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "A device which does not exist was specified.
+"
+2026-05-04T05:55:42.0005748+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T05:55:43.9235961+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T05:55:50.2288008+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T05:55:52.1442943+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
