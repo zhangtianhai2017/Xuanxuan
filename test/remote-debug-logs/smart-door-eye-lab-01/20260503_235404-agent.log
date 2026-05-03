@@ -1,0 +1,15 @@
+﻿2026-05-03T23:54:04.4077917+08:00 [AGENT] agent_start deviceId=smart-door-eye-lab-01 repoRoot=C:\Users\dengw\Documents\XuanXuan-smart-door-eye-20260503_235355 xiaoPort=AUTO autoDetectXiaoPort=True
+2026-05-03T23:54:10.1449725+08:00 [AGENT] serial_auto_detect preferred=AUTO selected=COM7 inventory=COM3:蓝牙链接上的标准串行_(COM3),COM4:蓝牙链接上的标准串行_(COM4),COM5:蓝牙链接上的标准串行_(COM5),COM6:蓝牙链接上的标准串行_(COM6),COM7:USB_串行设备_(COM7)
+2026-05-03T23:54:10.1846577+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "Access to the port 'COM7' is denied."
+2026-05-03T23:54:10.1906538+08:00 [AGENT] serial_initial_open_pending port=COM7
+2026-05-03T23:54:15.4594902+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "Access to the port 'COM7' is denied."
+2026-05-03T23:54:24.3890541+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "Access to the port 'COM7' is denied."
+2026-05-03T23:54:32.6911658+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "Access to the port 'COM7' is denied."
+2026-05-03T23:54:40.9513888+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "Access to the port 'COM7' is denied."
+2026-05-03T23:54:50.2724330+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "Access to the port 'COM7' is denied."
+2026-05-03T23:54:58.4983936+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "Access to the port 'COM7' is denied."
+2026-05-03T23:55:06.3638053+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "Access to the port 'COM7' is denied."
+2026-05-03T23:55:11.2570903+08:00 [AGENT] agent_update_detected action=restart script=C:\Users\dengw\Documents\XuanXuan-smart-door-eye-20260503_235355\release\smart-door-eye-remote-debug-20260502\scripts\remote_debug_agent.ps1
+2026-05-03T23:55:11.2860958+08:00 [AGENT] agent_stop reason=self_update
+2026-05-03T23:55:11.4556532+08:00 [AGENT] git_config_set key=user.name value="Smart Door Eye Remote Agent"
+2026-05-03T23:55:11.5395601+08:00 [AGENT] git_config_set key=user.email value="smart-door-eye-agent@example.invalid"

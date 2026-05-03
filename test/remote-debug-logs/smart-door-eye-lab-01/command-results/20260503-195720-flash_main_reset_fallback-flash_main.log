@@ -1,8 +1,0 @@
-﻿command_id=20260503-195720-flash_main_reset_fallback
-action=flash_main
-started=2026-05-03T20:04:46.9736448+08:00
-xiao_flash_attempt before=default-reset baud=921600 erase=True
->>> esptool --chip esp32c6 --port COM7 --baud 921600 --before default-reset --after hard-reset erase-flash
-esptool v5.2.0
-Serial port COM7:
-Connecting......................................
