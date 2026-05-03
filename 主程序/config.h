@@ -71,6 +71,14 @@ extern const char* baidu_secret_key;
 #define BUTTON_TEST_PROMPT_START_DELAY_MS 5000UL
 #define BUTTON_TEST_PROMPT_INTERVAL_MS    8000UL
 
+// 现场语音引导：每条提示都是一个很短的 MP3 文件，主控只保存 URL 和少量队列编号，
+// 不会把整套语音读进内存。下载时由 URLStream 分段读取，MP3DecoderHelix 边解码边通过 I2S 播放。
+// 这个功能专门服务异地调试：当门铃、PIR、CAM 等没有测到时，设备直接用语音提醒现场检查哪根线。
+#define FIELD_TEST_VOICE_GUIDE_ENABLED    true
+#define FIELD_TEST_PROMPT_QUEUE_SIZE      4
+#define FIELD_TEST_NEXT_STEP_DELAY_MS     12000UL
+#define FIELD_TEST_PROBLEM_INTERVAL_MS    15000UL
+
 // CAM 故障隔离参数，主要服务于异地课堂调试。
 // 临时飞线、供电接触不良或 CAM 未启动时，每次拍照都可能让主控等待很多秒。
 // 进入短暂退避后，PIR、门铃、WiFi、Blynk 和音频还能继续被测试，不会被坏 CAM 拖住。

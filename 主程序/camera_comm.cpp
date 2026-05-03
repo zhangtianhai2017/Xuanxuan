@@ -696,8 +696,18 @@ FaceProcessResult takePhotoAndProcess(int photoIndex, bool allowNewRegistration)
     byte* imageBuffer = nullptr;
     size_t imageSize = 0;
 
+    if (photoIndex == 0) {
+        playFieldTestPrompt(FIELD_PROMPT_CAMERA_PROMPT);
+    }
+
     if (takePhoto(&imageBuffer, &imageSize)) {
         logInfo("PHOTO", "CAPTURED", String("index=") + photoIndex + " bytes=" + imageSize);
+
+        if (photoIndex == 0) {
+            playFieldTestPrompt(lastPhotoUsedRemoteTestImage
+                                ? FIELD_PROMPT_CAMERA_NOT_DETECTED
+                                : FIELD_PROMPT_CAMERA_DETECTED);
+        }
 
         String base64Image = base64::encode(imageBuffer, imageSize);
         delete[] imageBuffer;
@@ -710,12 +720,22 @@ FaceProcessResult takePhotoAndProcess(int photoIndex, bool allowNewRegistration)
                 logWarn("FACE", "REGISTER_BLOCKED",
                         String("reason=remote_test_image index=") + photoIndex);
             }
-            return handleFaceRecognition(base64Image, allowRegistrationForThisImage);
+            if (photoIndex == 0) {
+                playFieldTestPrompt(FIELD_PROMPT_FACE_PROMPT);
+            }
+            FaceProcessResult result = handleFaceRecognition(base64Image, allowRegistrationForThisImage);
+            if (photoIndex == 0 && result != FACE_PROCESS_SKIPPED) {
+                playFieldTestPrompt(FIELD_PROMPT_FACE_OK);
+            }
+            return result;
         } else {
             logError("PHOTO", "BASE64_FAILED", String("index=") + photoIndex);
         }
     } else {
         logError("PHOTO", "CAPTURE_FAILED", String("index=") + photoIndex);
+        if (photoIndex == 0) {
+            playFieldTestPrompt(FIELD_PROMPT_CAMERA_NOT_DETECTED);
+        }
     }
     return FACE_PROCESS_SKIPPED;
 }

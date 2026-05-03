@@ -30,15 +30,15 @@
 
 - `00_test_start`: 智能猫眼现场测试开始。请先接好喇叭，并保持电脑上的远程调试窗口不要关闭。
 - `01_speaker_check`: 正在测试喇叭。如果你听到了这句话，请告诉远程调试人员，喇叭有声音。
-- `02_press_doorbell`: 请按一下门铃按钮，按住半秒后松开。
-- `03_doorbell_not_detected`: 没有检测到门铃按键。请检查门铃按钮一端是否接到 D 十，也就是 GPIO 十八，另一端是否接到 G N D。然后再按一次。
+- `02_press_doorbell`: 请按门铃，按住半秒。
+- `03_doorbell_not_detected`: 没检测到门铃。检查 D 十到按钮，按钮到 G N D。
 - `04_doorbell_detected`: 已经检测到门铃按键。门铃输入测试通过。
 - `05_pir_prompt`: 现在测试人体移动传感器。请站到 P I R 传感器前方，并保持三十秒。
-- `06_pir_not_detected`: 还没有检测到 P I R 信号。请检查 P I R 的 V C C，G N D，以及输出线是否接到 D 九，也就是 GPIO 二十。
+- `06_pir_not_detected`: 没检测到 P I R。检查 V C C，G N D，输出线到 D 九。
 - `07_pir_detected`: 已经检测到 P I R 人体移动信号。请继续保持，等待三十秒逗留测试。
 - `08_pir_hold_passed`: 三十秒逗留测试通过。系统将执行连续抓拍和威慑声音流程。
 - `09_camera_prompt`: 现在测试 E S P 三二摄像头。系统会向摄像头发送拍照指令。
-- `10_camera_not_detected`: 没有收到摄像头照片。请检查摄像头供电，公共地，串口线，以及 GPIO 零是否已经从 G N D 断开。
+- `10_camera_not_detected`: 没收到摄像头。检查供电，共地，T X，R X，和 GPIO 零。
 - `11_camera_detected`: 已经收到摄像头照片。摄像头串口通信测试通过。
 - `12_face_prompt`: 现在测试百度云人脸识别。请保持网络连接，并等待识别结果。
 - `13_face_ok`: 人脸识别接口已经返回结果。云端识别流程测试通过。

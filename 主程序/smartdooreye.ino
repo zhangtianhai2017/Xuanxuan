@@ -40,11 +40,14 @@ void handleWiFiReconnect();
 void handleTokenRefresh();
 void handlePIR();
 void handleButton();
-void handleButtonTestPrompt();
+void handleFieldTestPrompts();
 
 // 远程调试时用来确认门铃按键 D10/GPIO18 是否真正接好。
 // 只要还没有在日志里看到一次有效按下，就认为“按键测试未通过”。
 bool doorbellButtonTestPassed = false;
+unsigned long doorbellButtonTestPassedAt = 0;
+bool pirMotionTestPassed = false;
+bool pirHoldTestPassed = false;
 
 void setup() {
     // Serial 是给电脑串口监视器看的调试日志。
@@ -74,6 +77,8 @@ void setup() {
     loadCounters();
 
     logInfo("BOOT", "READY");
+    playFieldTestPrompt(FIELD_PROMPT_TEST_START);
+    playFieldTestPrompt(FIELD_PROMPT_SPEAKER_CHECK);
 }
 
 void loop() {
@@ -84,7 +89,7 @@ void loop() {
     audioLoop();
     handleWiFiReconnect();
     handleButton();
-    handleButtonTestPrompt();
+    handleFieldTestPrompts();
     handlePIR();
     handleTokenRefresh();
     delay(10);
@@ -197,12 +202,20 @@ void handlePIR() {
             pirWasHigh = true;
             lastPIRHighTime = millis();
             logInfo("PIR", "MOTION_START", "pin=20 state=HIGH");
+            if (!pirMotionTestPassed) {
+                pirMotionTestPassed = true;
+                playFieldTestPrompt(FIELD_PROMPT_PIR_DETECTED);
+            }
         } else if (!pirTriggered && (millis() - lastPIRHighTime >= PIR_HOLD_TIME)) {
             pirTriggered = true;
             logInfo("PIR", "HOLD_REACHED", String("hold_ms=") + (millis() - lastPIRHighTime) + " capture_count=3");
             // 功能需求：PIR 异常逗留后应尽快发出声音威慑。
             // 因此先启动 3 首吵架音队列，再尝试拍照；即使 CAM 当前故障，音频测试也不被拖住。
             playRandomQuarrelSequence(3);
+            if (!pirHoldTestPassed) {
+                pirHoldTestPassed = true;
+                playFieldTestPrompt(FIELD_PROMPT_PIR_HOLD_PASSED);
+            }
             // 连续拍 3 张：每一张都会走 takePhotoAndProcess()，
             // 即拍照 -> Base64 -> 百度人脸识别。
             bool registeredNewFaceThisEvent = false;
@@ -244,11 +257,13 @@ void handleButton() {
             logInfo("BUTTON", "DOORBELL_PRESSED", "pin=18 state=LOW");
             if (!doorbellButtonTestPassed) {
                 doorbellButtonTestPassed = true;
+                doorbellButtonTestPassedAt = millis();
                 logInfo("BUTTON", "TEST_PASSED", "pin=18 first_valid_press=1");
             }
             // 功能需求：访客按门铃后，提示音应立即响应，让现场能先确认按键和音频链路。
             // 拍照/百度识别随后执行；CAM 故障时会使用模拟图，不会阻塞其它测试太久。
             playDoorbell();
+            playFieldTestPrompt(FIELD_PROMPT_DOORBELL_DETECTED);
             takePhotoAndProcess(0);
 
             // Blynk 通知是辅助功能：如果 Blynk 未连接，包装函数会自动跳过。
@@ -263,35 +278,66 @@ void handleButton() {
     lastButtonState = currentState;
 }
 
-void handleButtonTestPrompt() {
-    // 远程调试功能：现场同学未必一直盯着聊天窗口，所以主控可以自己
-    // 通过 reSpeaker 语音提示“请按门铃按钮”。它只用于确认 D10/GPIO18：
-    // 按键一端接 GPIO18，另一端接 GND，按下后 INPUT_PULLUP 会读到 LOW。
-    if (!BUTTON_TEST_PROMPT_ENABLED || doorbellButtonTestPassed) {
+void handleFieldTestPrompts() {
+    // 远程现场测试引导：提示音必须短、分段、低优先级。
+    // 每次只播放一个小 MP3，主控只保存提示编号；真正的音频数据由 URLStream 分段下载，
+    // 这样不会把几十 KB 的 MP3 一次性塞进 ESP32-C6 的 RAM。
+    if (!FIELD_TEST_VOICE_GUIDE_ENABLED) {
         return;
     }
 
-    static bool firstPromptSent = false;
-    static unsigned long lastPromptTime = 0;
+    static unsigned long lastButtonPromptTime = 0;
+    static unsigned long lastPirPromptTime = 0;
+    static uint8_t buttonPromptStep = 0;
+    static uint8_t pirPromptStep = 0;
     unsigned long now = millis();
 
-    if (!firstPromptSent) {
+    if (BUTTON_TEST_PROMPT_ENABLED && !doorbellButtonTestPassed) {
         if (now < BUTTON_TEST_PROMPT_START_DELAY_MS) {
             return;
         }
-        firstPromptSent = true;
-    } else if (now - lastPromptTime < BUTTON_TEST_PROMPT_INTERVAL_MS) {
+        if (now - lastButtonPromptTime < BUTTON_TEST_PROMPT_INTERVAL_MS) {
+            return;
+        }
+
+        if (digitalRead(PIN_BUTTON) == LOW) {
+            // handleButton() 会在消抖后记录 DOORBELL_PRESSED。这里先不播提示，
+            // 避免用户已经按下时又被提示音打断。
+            return;
+        }
+
+        lastButtonPromptTime = now;
+        logWarn("BUTTON", "TEST_PROMPT_WAITING",
+                String("pin=18 interval_ms=") + BUTTON_TEST_PROMPT_INTERVAL_MS
+                + " step=" + buttonPromptStep);
+
+        if (buttonPromptStep == 0) {
+            playFieldTestPrompt(FIELD_PROMPT_PRESS_DOORBELL);
+        } else {
+            // 后续轮次交替播放“没测到”和“再按一次”，让现场同学知道不是单纯等待。
+            playFieldTestPrompt((buttonPromptStep % 2) == 1
+                                ? FIELD_PROMPT_DOORBELL_NOT_DETECTED
+                                : FIELD_PROMPT_PRESS_DOORBELL);
+        }
+        buttonPromptStep++;
         return;
     }
 
-    if (digitalRead(PIN_BUTTON) == LOW) {
-        // handleButton() 会在消抖后记录 DOORBELL_PRESSED。这里先不播提示，
-        // 避免用户已经按下时又被提示音打断。
-        return;
-    }
+    if (doorbellButtonTestPassed && !pirMotionTestPassed) {
+        if (doorbellButtonTestPassedAt == 0 || now - doorbellButtonTestPassedAt < FIELD_TEST_NEXT_STEP_DELAY_MS) {
+            return;
+        }
+        if (now - lastPirPromptTime < FIELD_TEST_PROBLEM_INTERVAL_MS) {
+            return;
+        }
 
-    lastPromptTime = now;
-    logWarn("BUTTON", "TEST_PROMPT_WAITING",
-            String("pin=18 interval_ms=") + BUTTON_TEST_PROMPT_INTERVAL_MS);
-    playButtonTestPrompt();
+        lastPirPromptTime = now;
+        logWarn("PIR", "TEST_PROMPT_WAITING",
+                String("pin=20 interval_ms=") + FIELD_TEST_PROBLEM_INTERVAL_MS
+                + " step=" + pirPromptStep);
+        playFieldTestPrompt((pirPromptStep % 2) == 0
+                            ? FIELD_PROMPT_PIR_PROMPT
+                            : FIELD_PROMPT_PIR_NOT_DETECTED);
+        pirPromptStep++;
+    }
 }

@@ -12,12 +12,12 @@
   {
     "id": "02_press_doorbell",
     "file": "02_press_doorbell.mp3",
-    "text": "请按一下门铃按钮，按住半秒后松开。"
+    "text": "请按门铃，按住半秒。"
   },
   {
     "id": "03_doorbell_not_detected",
     "file": "03_doorbell_not_detected.mp3",
-    "text": "没有检测到门铃按键。请检查门铃按钮一端是否接到 D 十，也就是 GPIO 十八，另一端是否接到 G N D。然后再按一次。"
+    "text": "没检测到门铃。检查 D 十到按钮，按钮到 G N D。"
   },
   {
     "id": "04_doorbell_detected",
@@ -32,7 +32,7 @@
   {
     "id": "06_pir_not_detected",
     "file": "06_pir_not_detected.mp3",
-    "text": "还没有检测到 P I R 信号。请检查 P I R 的 V C C，G N D，以及输出线是否接到 D 九，也就是 GPIO 二十。"
+    "text": "没检测到 P I R。检查 V C C，G N D，输出线到 D 九。"
   },
   {
     "id": "07_pir_detected",
@@ -52,7 +52,7 @@
   {
     "id": "10_camera_not_detected",
     "file": "10_camera_not_detected.mp3",
-    "text": "没有收到摄像头照片。请检查摄像头供电，公共地，串口线，以及 GPIO 零是否已经从 G N D 断开。"
+    "text": "没收到摄像头。检查供电，共地，T X，R X，和 GPIO 零。"
   },
   {
     "id": "11_camera_detected",
