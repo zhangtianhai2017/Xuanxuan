@@ -919,3 +919,22 @@
 "
 2026-05-04T06:29:49.9737391+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
 2026-05-04T06:29:56.3871159+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T06:30:05.4791307+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T06:30:09.3143600+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T06:30:16.6899535+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T06:30:18.6122597+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T06:30:25.1897076+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T06:30:27.1130924+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T06:30:33.6516442+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T06:30:35.5710450+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T06:30:42.0441767+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T06:30:43.9652997+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T06:30:50.5906726+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T06:30:52.5126863+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T06:31:00.0572961+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
