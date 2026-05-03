@@ -55,6 +55,9 @@ function Test-AgentPortReturnIsClean {
   $agentText = Get-Content -Raw -Encoding UTF8 $AgentPath
   Assert-True -Condition ($agentText -match 'Write-Host \$out') -Message "Write-AgentLog must print to console explicitly."
   Assert-True -Condition ($agentText -notmatch '\$out\s*\|\s*Tee-Object\s+-FilePath\s+\$AgentLogFile\s+-Append\s*(\r?\n\s*)?}') -Message "Write-AgentLog must not return Tee-Object output."
+  Assert-True -Condition ($agentText -match 'Invoke-XiaoEsp32C6FlashToLog') -Message "Agent must use XIAO ESP32C6 flash reset fallback."
+  Assert-True -Condition ($agentText -match 'usb-reset') -Message "Agent must try usb-reset for XIAO ESP32C6 native USB flashing."
+  Assert-True -Condition ($agentText -notmatch 'Tee-Object\s+-FilePath\s+\$ResultLog') -Message "esptool result logs must stay plain UTF-8 text."
 
   $tempDir = Join-Path "C:\tmp" ("smart-door-eye-agent-return-test-" + (Get-Date -Format "yyyyMMddHHmmssfff"))
   New-Item -ItemType Directory -Force $tempDir | Out-Null

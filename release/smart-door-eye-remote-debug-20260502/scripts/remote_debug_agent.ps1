@@ -402,10 +402,65 @@ function Invoke-EsptoolToLog {
   if (-not (Test-Path $esptool)) {
     throw "esptool.exe not found: $esptool"
   }
-  ">>> esptool $($ToolArgs -join ' ')" | Tee-Object -FilePath $ResultLog -Append | Out-Null
-  & $esptool @ToolArgs *>&1 | Tee-Object -FilePath $ResultLog -Append | Out-Null
+  $cmdLine = ">>> esptool $($ToolArgs -join ' ')"
+  Add-Content -Encoding UTF8 -LiteralPath $ResultLog -Value $cmdLine
+  Write-Host $cmdLine
+  & $esptool @ToolArgs *>&1 | ForEach-Object {
+    # 不用 Tee-Object 写刷机日志。Windows PowerShell 的 Tee-Object 在某些
+    # 输出组合下会把文件写成带 NUL 的 UTF-16 片段，远程查看很难读。逐行
+    # Add-Content 可以保证 command-result 日志是普通 UTF-8 文本。
+    $line = [string]$_
+    Add-Content -Encoding UTF8 -LiteralPath $ResultLog -Value $line
+    Write-Host $line
+  }
   $toolExitCode = [int]$LASTEXITCODE
+  Add-Content -Encoding UTF8 -LiteralPath $ResultLog -Value "esptool_exit_code=$toolExitCode"
   return $toolExitCode
+}
+
+function Invoke-XiaoEsp32C6FlashToLog {
+  param(
+    [string]$Port,
+    [string]$Firmware,
+    [bool]$Erase,
+    [string]$ResultLog
+  )
+
+  # XIAO ESP32C6 通过板载 USB-C 连接电脑。不同电脑、线材和驱动下，
+  # esptool 让芯片进入 ROM 下载模式的复位方式可能不同：
+  # default-reset 走常见 DTR/RTS 自动复位；usb-reset 对原生 USB CDC
+  # 设备更有机会成功。远程现场不熟悉按 BOOT/RESET，所以 Agent 先自动
+  # 尝试这些组合，把每次尝试都写进日志。
+  $attempts = @(
+    @{ before = "default-reset"; baud = "921600" },
+    @{ before = "usb-reset"; baud = "921600" },
+    @{ before = "default-reset"; baud = "460800" },
+    @{ before = "usb-reset"; baud = "460800" }
+  )
+
+  $lastExitCode = 1
+  foreach ($attempt in $attempts) {
+    $before = [string]$attempt.before
+    $baud = [string]$attempt.baud
+    Add-Content -Encoding UTF8 -LiteralPath $ResultLog -Value "xiao_flash_attempt before=$before baud=$baud erase=$Erase"
+
+    if ($Erase) {
+      $lastExitCode = Invoke-EsptoolToLog -ToolArgs @("--chip","esp32c6","--port",$Port,"--baud",$baud,"--before",$before,"--after","hard-reset","erase-flash") -ResultLog $ResultLog
+      if ($lastExitCode -ne 0) {
+        Add-Content -Encoding UTF8 -LiteralPath $ResultLog -Value "xiao_flash_attempt_failed stage=erase before=$before baud=$baud exit=$lastExitCode"
+        continue
+      }
+    }
+
+    $lastExitCode = Invoke-EsptoolToLog -ToolArgs @("--chip","esp32c6","--port",$Port,"--baud",$baud,"--before",$before,"--after","hard-reset","write-flash","-z","--flash-mode","dio","--flash-freq","80m","--flash-size","4MB","0x0",$Firmware) -ResultLog $ResultLog
+    if ($lastExitCode -eq 0) {
+      Add-Content -Encoding UTF8 -LiteralPath $ResultLog -Value "xiao_flash_attempt_ok before=$before baud=$baud"
+      return 0
+    }
+    Add-Content -Encoding UTF8 -LiteralPath $ResultLog -Value "xiao_flash_attempt_failed stage=write before=$before baud=$baud exit=$lastExitCode"
+  }
+
+  return $lastExitCode
 }
 
 function Close-XiaoSerial {
@@ -476,11 +531,7 @@ function Invoke-FlashCommand {
     $fw = Get-FirmwarePathFromCommand -Command $Command -DefaultPath ([string]$Config.defaultMainFirmware)
     Close-XiaoSerial
     try {
-      if ($erase) {
-        $exitCode = Invoke-EsptoolToLog -ToolArgs @("--chip","esp32c6","--port",$port,"--baud","921600","--before","default-reset","--after","hard-reset","erase-flash") -ResultLog $resultLog
-        if ($exitCode -ne 0) { throw "erase-flash failed exit=$exitCode" }
-      }
-      $exitCode = Invoke-EsptoolToLog -ToolArgs @("--chip","esp32c6","--port",$port,"--baud","921600","--before","default-reset","--after","hard-reset","write-flash","-z","--flash-mode","dio","--flash-freq","80m","--flash-size","4MB","0x0",$fw) -ResultLog $resultLog
+      $exitCode = Invoke-XiaoEsp32C6FlashToLog -Port $port -Firmware $fw -Erase $erase -ResultLog $resultLog
     } finally {
       Open-XiaoSerial -Retries 10 -DelaySeconds 2 | Out-Null
     }
@@ -490,11 +541,7 @@ function Invoke-FlashCommand {
     $fw = Get-FirmwarePathFromCommand -Command $Command -DefaultPath ([string]$Config.defaultXvfTestFirmware)
     Close-XiaoSerial
     try {
-      if ($erase) {
-        $exitCode = Invoke-EsptoolToLog -ToolArgs @("--chip","esp32c6","--port",$port,"--baud","921600","--before","default-reset","--after","hard-reset","erase-flash") -ResultLog $resultLog
-        if ($exitCode -ne 0) { throw "erase-flash failed exit=$exitCode" }
-      }
-      $exitCode = Invoke-EsptoolToLog -ToolArgs @("--chip","esp32c6","--port",$port,"--baud","921600","--before","default-reset","--after","hard-reset","write-flash","-z","--flash-mode","dio","--flash-freq","80m","--flash-size","4MB","0x0",$fw) -ResultLog $resultLog
+      $exitCode = Invoke-XiaoEsp32C6FlashToLog -Port $port -Firmware $fw -Erase $erase -ResultLog $resultLog
     } finally {
       Open-XiaoSerial -Retries 10 -DelaySeconds 2 | Out-Null
     }
