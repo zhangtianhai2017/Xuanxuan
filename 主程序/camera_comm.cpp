@@ -95,6 +95,18 @@ static void serviceBackgroundWhileWaiting() {
     audioLoop();
 }
 
+static void letVoicePromptRunBeforeContinue(unsigned long durationMs) {
+    // 现场调试里，“设备说了什么”本身就是诊断信息。
+    // CAM 失败后如果马上进入 Base64/百度 HTTP，主循环会被同步网络请求占用，
+    // 提示音可能排队很久才播。这里给音频任务一个短窗口，尽量先把故障提示播出来，
+    // 然后仍然继续用 GitHub 测试图走后续识别链路。
+    unsigned long startMs = millis();
+    while (millis() - startMs < durationMs && isAudioBusy()) {
+        serviceBackgroundWhileWaiting();
+        delay(2);
+    }
+}
+
 static bool cameraBackoffActive() {
     if (cameraBackoffUntil == 0) {
         return false;
@@ -704,9 +716,12 @@ FaceProcessResult takePhotoAndProcess(int photoIndex, bool allowNewRegistration)
         logInfo("PHOTO", "CAPTURED", String("index=") + photoIndex + " bytes=" + imageSize);
 
         if (photoIndex == 0) {
-            playFieldTestPrompt(lastPhotoUsedRemoteTestImage
-                                ? FIELD_PROMPT_CAMERA_NOT_DETECTED
-                                : FIELD_PROMPT_CAMERA_DETECTED);
+            if (lastPhotoUsedRemoteTestImage) {
+                playFieldTestPrompt(FIELD_PROMPT_CAMERA_NOT_DETECTED);
+                letVoicePromptRunBeforeContinue(FIELD_TEST_CAMERA_PROMPT_BEFORE_CONTINUE_MS);
+            } else {
+                playFieldTestPrompt(FIELD_PROMPT_CAMERA_DETECTED);
+            }
         }
 
         String base64Image = base64::encode(imageBuffer, imageSize);

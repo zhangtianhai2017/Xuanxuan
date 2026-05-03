@@ -78,6 +78,10 @@ extern const char* baidu_secret_key;
 #define FIELD_TEST_PROMPT_QUEUE_SIZE      4
 #define FIELD_TEST_NEXT_STEP_DELAY_MS     12000UL
 #define FIELD_TEST_PROBLEM_INTERVAL_MS    15000UL
+// CAM 失败后会自动用 GitHub 上的小真人图代替真实照片继续测试百度链路。
+// 但如果立刻进入 HTTP 人脸识别，提示音可能要等很久才开始跑；这里给提示音一个短暂播放窗口，
+// 让现场先听到“没收到摄像头，请检查供电/串口/GPIO0”，随后继续后续识别流程。
+#define FIELD_TEST_CAMERA_PROMPT_BEFORE_CONTINUE_MS 4500UL
 
 // CAM 故障隔离参数，主要服务于异地课堂调试。
 // 临时飞线、供电接触不良或 CAM 未启动时，每次拍照都可能让主控等待很多秒。

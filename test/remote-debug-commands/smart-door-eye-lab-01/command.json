@@ -1,5 +1,5 @@
 ﻿{
-    "id":  "20260503-170229-flash_main_voice_guide",
+    "id":  "20260503-171432-flash_main_cam_fallback_prompt",
     "action":  "flash_main",
     "firmware":  "release/smart-door-eye-remote-debug-20260502/firmware/main_xiao_esp32c6/smartdooreye.ino.merged.bin",
     "erase":  true

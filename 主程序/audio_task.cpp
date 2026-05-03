@@ -402,7 +402,9 @@ void playAudioFromUrl(const char* url) {
 
 bool isAudioBusy() {
     // 测试提示音不应该打断门铃声、PIR 威慑音或正在建立的网络音频连接。
-    return audioActive || pendingAudioUrl != nullptr || pendingQuarrelTracks > 0;
+    // fieldPromptQueueCount 也算 busy，因为队列里虽然只有提示编号，没有音频字节，
+    // 但下一次 audioLoop() 会把它转成一个网络 MP3 播放请求。
+    return audioActive || pendingAudioUrl != nullptr || pendingQuarrelTracks > 0 || fieldPromptQueueCount > 0;
 }
 
 void playRandomQuarrel() {
