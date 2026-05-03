@@ -195,3 +195,11 @@
 2026-05-03T22:18:38.4610361+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
 2026-05-03T22:18:42.0474496+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
 2026-05-03T22:18:45.4912997+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T22:18:53.1175071+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T22:18:57.7038815+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T22:19:01.2597654+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T22:19:04.8557812+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T22:19:08.4278262+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T22:19:12.0130710+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T22:19:15.6041399+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T22:19:20.2671700+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
