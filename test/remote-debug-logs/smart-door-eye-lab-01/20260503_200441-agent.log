@@ -6,3 +6,4 @@
 2026-05-03T20:04:56.9292640+08:00 [AGENT] command_failed id=20260503-195720-flash_main_reset_fallback error=
 2026-05-03T20:09:51.2911328+08:00 [AGENT] agent_update_detected action=restart script=C:\Users\dengw\Documents\XuanXuan-smart-door-eye-20260503_193720\release\smart-door-eye-remote-debug-20260502\scripts\remote_debug_agent.ps1
 2026-05-03T20:09:51.2956487+08:00 [AGENT] agent_stop reason=self_update
+2026-05-03T20:09:55.1228737+08:00 [AGENT] agent_replacement_started mode=direct script=C:\Users\dengw\Documents\XuanXuan-smart-door-eye-20260503_193720\release\smart-door-eye-remote-debug-20260502\scripts\remote_debug_agent.ps1

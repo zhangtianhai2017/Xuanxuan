@@ -1,0 +1,41 @@
+﻿command_id=20260503-200720-flash_main_process_capture
+action=flash_main
+started=2026-05-03T20:10:00.5775640+08:00
+xiao_flash_attempt before=default-reset baud=921600 erase=True
+>>> esptool --chip esp32c6 --port COM7 --baud 921600 --before default-reset --after hard-reset erase-flash
+esptool v5.2.0
+Serial port COM7:
+Connecting......................................
+stderr: A fatal error occurred: Failed to connect to ESP32-C6: No serial data received.
+stderr: For troubleshooting steps visit: https://docs.espressif.com/projects/esptool/en/latest/troubleshooting.html
+esptool_exit_code=2
+xiao_flash_attempt_failed stage=erase before=default-reset baud=921600 exit=2
+xiao_flash_attempt before=usb-reset baud=921600 erase=True
+>>> esptool --chip esp32c6 --port COM7 --baud 921600 --before usb-reset --after hard-reset erase-flash
+esptool v5.2.0
+Serial port COM7:
+Connecting......................................
+stderr: A fatal error occurred: Failed to connect to ESP32-C6: No serial data received.
+stderr: For troubleshooting steps visit: https://docs.espressif.com/projects/esptool/en/latest/troubleshooting.html
+esptool_exit_code=2
+xiao_flash_attempt_failed stage=erase before=usb-reset baud=921600 exit=2
+xiao_flash_attempt before=default-reset baud=460800 erase=True
+>>> esptool --chip esp32c6 --port COM7 --baud 460800 --before default-reset --after hard-reset erase-flash
+esptool v5.2.0
+Serial port COM7:
+Connecting......................................
+stderr: A fatal error occurred: Failed to connect to ESP32-C6: No serial data received.
+stderr: For troubleshooting steps visit: https://docs.espressif.com/projects/esptool/en/latest/troubleshooting.html
+esptool_exit_code=2
+xiao_flash_attempt_failed stage=erase before=default-reset baud=460800 exit=2
+xiao_flash_attempt before=usb-reset baud=460800 erase=True
+>>> esptool --chip esp32c6 --port COM7 --baud 460800 --before usb-reset --after hard-reset erase-flash
+esptool v5.2.0
+Serial port COM7:
+Connecting......................................
+stderr: A fatal error occurred: Failed to connect to ESP32-C6: No serial data received.
+stderr: For troubleshooting steps visit: https://docs.espressif.com/projects/esptool/en/latest/troubleshooting.html
+esptool_exit_code=2
+xiao_flash_attempt_failed stage=erase before=usb-reset baud=460800 exit=2
+finished=2026-05-03T20:10:36.6276493+08:00
+exitCode=2
