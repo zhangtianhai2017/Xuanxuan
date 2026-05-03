@@ -848,3 +848,7 @@
 2026-05-03T23:30:43.7365693+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
 2026-05-03T23:30:47.3205347+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
 2026-05-03T23:30:50.9906147+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-03T23:47:58.0160464+08:00 [AGENT] serial_read_failed port=COM7 error=使用“0”个参数调用“ReadLine”时发生异常:“由于线程退出或应用程序请求，已中止 I/O 操作。
+”
+2026-05-03T23:48:00.9676441+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-03T23:48:04.5329206+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
