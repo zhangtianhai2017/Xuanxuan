@@ -10,3 +10,6 @@
 2026-05-03T21:07:09.0673684+08:00 [AGENT] serial_read_failed port=COM7 error=使用“0”个参数调用“ReadLine”时发生异常:“由于线程退出或应用程序请求，已中止 I/O 操作。
 ”
 2026-05-03T21:07:11.9402162+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-03T21:12:09.4214377+08:00 [AGENT] command_start id=20260503-211020-flash_main_after_download_mode action=flash_main
+2026-05-03T21:12:24.9385088+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-03T21:12:24.9450670+08:00 [AGENT] command_ok id=20260503-211020-flash_main_after_download_mode result=C:\Users\dengw\Documents\XuanXuan-smart-door-eye-20260503_193720\test\remote-debug-logs\smart-door-eye-lab-01\command-results\20260503-211020-flash_main_after_download_mode-flash_main.log
