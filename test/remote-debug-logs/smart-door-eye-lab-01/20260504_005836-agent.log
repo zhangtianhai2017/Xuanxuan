@@ -322,3 +322,17 @@
 2026-05-04T05:49:15.1716868+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "The port 'COM7' does not exist."
 2026-05-04T05:49:22.7986865+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "The port 'COM7' does not exist."
 2026-05-04T05:49:30.1717024+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T05:49:42.9899332+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T05:49:44.9151991+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T05:49:51.6414864+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T05:49:56.9372360+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T05:49:58.8489239+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T05:50:05.2796426+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T05:50:07.4916201+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T05:50:13.9417065+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "The port 'COM7' does not exist."
+2026-05-04T05:50:22.3308315+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "The port 'COM7' does not exist."
+2026-05-04T05:50:29.9181308+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "The port 'COM7' does not exist."
+2026-05-04T05:50:37.6173578+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
