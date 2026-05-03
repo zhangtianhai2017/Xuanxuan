@@ -86,3 +86,19 @@
 2026-05-04T05:29:31.1932528+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "The port 'COM7' does not exist."
 2026-05-04T05:29:38.5161833+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "A device attached to the system is not functioning.
 "
+2026-05-04T05:29:49.3849653+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T05:29:53.2135322+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T05:29:59.8719130+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T05:30:01.7855877+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T05:30:08.3969385+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "The port 'COM7' does not exist."
+2026-05-04T05:30:16.7257046+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T05:30:18.3730201+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T05:30:24.6026663+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T05:30:26.5223994+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T05:30:32.9782233+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T05:30:38.2557902+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "The port 'COM7' does not exist."
+2026-05-04T05:30:45.7433669+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
