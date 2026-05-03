@@ -23,12 +23,159 @@ Preferences prefs;
 static const unsigned long REGISTER_COOLDOWN_MS = 5000;
 static unsigned long lastRegisterTime = 0;
 
-static void appendImageJsonPrefix(String& body, const String& base64Image) {
-  // 不使用小容量 StaticJsonDocument 来装 Base64 图片，因为图片字符串可能几十 KB。
-  // 手工拼 JSON 对初学者来说更直观，也能避免 ArduinoJson 容量不足。
-  body += "{\"image\":\"";
-  body += base64Image;
-  body += "\",\"image_type\":\"BASE64\"";
+class ImageJsonBodyStream : public Stream {
+public:
+  ImageJsonBodyStream(const char* prefix, const String& imageBase64, const String& suffix)
+    : prefix_(prefix),
+      prefixLength_(strlen(prefix)),
+      imageBase64_(imageBase64),
+      suffix_(suffix),
+      position_(0) {}
+
+  size_t contentLength() const {
+    return prefixLength_ + imageBase64_.length() + suffix_.length();
+  }
+
+  size_t bytesRead() const {
+    return position_;
+  }
+
+  int available() override {
+    size_t remaining = contentLength() - position_;
+    return remaining > 32767 ? 32767 : (int)remaining;
+  }
+
+  int read() override {
+    if (position_ >= contentLength()) {
+      return -1;
+    }
+    int value = byteAt(position_);
+    position_++;
+    return value;
+  }
+
+  int peek() override {
+    if (position_ >= contentLength()) {
+      return -1;
+    }
+    return byteAt(position_);
+  }
+
+  void flush() override {}
+
+  size_t write(uint8_t) override {
+    return 0;
+  }
+
+private:
+  int byteAt(size_t index) const {
+    if (index < prefixLength_) {
+      return (uint8_t)prefix_[index];
+    }
+
+    index -= prefixLength_;
+    if (index < imageBase64_.length()) {
+      return (uint8_t)imageBase64_.charAt(index);
+    }
+
+    index -= imageBase64_.length();
+    return (uint8_t)suffix_.charAt(index);
+  }
+
+  const char* prefix_;
+  size_t prefixLength_;
+  const String& imageBase64_;
+  const String& suffix_;
+  size_t position_;
+};
+
+static bool isBase64Char(char ch) {
+  return (ch >= 'A' && ch <= 'Z')
+      || (ch >= 'a' && ch <= 'z')
+      || (ch >= '0' && ch <= '9')
+      || ch == '+'
+      || ch == '/'
+      || ch == '=';
+}
+
+static bool validateBase64ImageForBaidu(const String& base64Image, const char* action) {
+  // Baidu requires plain Base64 in the JSON image field: no data:image prefix,
+  // no URL escaping, no newlines, and no memory-corruption characters.
+  // The chars/free_heap log helps remote debugging without touching hardware.
+  if (base64Image.length() == 0) {
+    logError("FACE", "BASE64_INVALID", String("action=") + action + " reason=empty");
+    return false;
+  }
+
+  if ((base64Image.length() % 4) != 0) {
+    logError("FACE", "BASE64_INVALID",
+             String("action=") + action
+             + " reason=length_not_multiple_of_4 chars=" + base64Image.length());
+    return false;
+  }
+
+  for (size_t i = 0; i < base64Image.length(); i++) {
+    char ch = base64Image.charAt(i);
+    if (!isBase64Char(ch)) {
+      logError("FACE", "BASE64_INVALID",
+               String("action=") + action
+               + " reason=bad_char index=" + i
+               + " ascii=" + (int)(uint8_t)ch);
+      return false;
+    }
+  }
+
+  logInfo("FACE", "BASE64_CHECK_OK",
+          String("action=") + action
+          + " chars=" + base64Image.length()
+          + " free_heap=" + ESP.getFreeHeap());
+  return true;
+}
+
+static int postBaiduImageJson(const String& url,
+                              const String& base64Image,
+                              const String& suffix,
+                              const char* action,
+                              String& response) {
+  if (!validateBase64ImageForBaidu(base64Image, action)) {
+    return -10001;
+  }
+
+  // Do not copy Base64 into one huge requestBody String. A 20-30 KB JPEG
+  // becomes 27-40 KB of Base64; duplicating it as JSON can fragment ESP32-C6
+  // heap while WiFi, audio, and HTTP are active. This Stream sends the body in
+  // three pieces: JSON prefix, Base64 image, and JSON suffix.
+  ImageJsonBodyStream body("{\"image\":\"", base64Image, suffix);
+
+  HTTPClient http;
+  http.setTimeout(BAIDU_HTTP_TIMEOUT_MS);
+  if (!http.begin(url)) {
+    logError("FACE", "HTTP_BEGIN_FAILED", String("action=") + action);
+    return -10002;
+  }
+
+  http.addHeader("Content-Type", "application/json; charset=utf-8");
+  http.addHeader("Connection", "close");
+  logInfo("FACE", "POST_START",
+          String("action=") + action
+          + " body_bytes=" + body.contentLength()
+          + " image_chars=" + base64Image.length()
+          + " timeout_ms=" + BAIDU_HTTP_TIMEOUT_MS
+          + " free_heap=" + ESP.getFreeHeap());
+
+  int httpCode = http.sendRequest("POST", &body, body.contentLength());
+  logInfo("FACE", "POST_DONE",
+          String("action=") + action
+          + " http=" + httpCode
+          + " sent_bytes=" + body.bytesRead()
+          + " body_bytes=" + body.contentLength()
+          + " free_heap=" + ESP.getFreeHeap());
+
+  if (httpCode == 200) {
+    response = http.getString();
+  }
+  http.end();
+  return httpCode;
 }
 
 String getBaiduAccessToken() {
@@ -81,24 +228,14 @@ String detectGender(const String& base64Image) {
 
   String url = "https://aip.baidubce.com/rest/2.0/face/v3/detect?access_token=" + baidu_access_token;
 
-  String requestBody;
-  requestBody.reserve(base64Image.length() + 160);
-  appendImageJsonPrefix(requestBody, base64Image);
-  requestBody += ",\"face_field\":\"gender\",\"max_face_num\":1}";
-
-  HTTPClient http;
-  http.begin(url);
-  http.addHeader("Content-Type", "application/json");
-  int httpCode = http.POST(requestBody);
+  String response;
+  String suffix = "\",\"image_type\":\"BASE64\",\"face_field\":\"gender\",\"max_face_num\":1}";
+  int httpCode = postBaiduImageJson(url, base64Image, suffix, "detect", response);
 
   if (httpCode != 200) {
     logError("FACE", "DETECT_HTTP_FAILED", String("http=") + httpCode);
-    http.end();
     return "";
   }
-
-  String response = http.getString();
-  http.end();
 
   DynamicJsonDocument respDoc(4096);
   DeserializationError err = deserializeJson(respDoc, response);
@@ -150,28 +287,18 @@ FaceSearchResult faceSearch(const String& base64Image, String& matchedUserId) {
 
   String url = "https://aip.baidubce.com/rest/2.0/face/v3/search?access_token=" + baidu_access_token;
 
-  String requestBody;
-  requestBody.reserve(base64Image.length() + 256);
-  appendImageJsonPrefix(requestBody, base64Image);
-  requestBody += ",\"group_id_list\":\"";
-  requestBody += FACE_GROUP_ID;
-  requestBody += "\",\"match_threshold\":";
-  requestBody += String((int)MATCH_THRESHOLD);
-  requestBody += ",\"quality_control\":\"NONE\",\"liveness_control\":\"NONE\"}";
-
-  HTTPClient http;
-  http.begin(url);
-  http.addHeader("Content-Type", "application/json");
-  int httpCode = http.POST(requestBody);
+  String response;
+  String suffix = "\",\"image_type\":\"BASE64\",\"group_id_list\":\"";
+  suffix += FACE_GROUP_ID;
+  suffix += "\",\"match_threshold\":";
+  suffix += String((int)MATCH_THRESHOLD);
+  suffix += ",\"quality_control\":\"NONE\",\"liveness_control\":\"NONE\"}";
+  int httpCode = postBaiduImageJson(url, base64Image, suffix, "search", response);
 
   if (httpCode != 200) {
     logError("FACE", "SEARCH_HTTP_FAILED", String("http=") + httpCode);
-    http.end();
     return SEARCH_FAILED;
   }
-
-  String response = http.getString();
-  http.end();
 
   DynamicJsonDocument respDoc(4096);
   DeserializationError err = deserializeJson(respDoc, response);
@@ -243,31 +370,21 @@ String registerNewFace(const String& base64Image, const String& gender) {
 
   String url = "https://aip.baidubce.com/rest/2.0/face/v3/faceset/user/add?access_token=" + baidu_access_token;
 
-  String requestBody;
-  requestBody.reserve(base64Image.length() + 256);
-  appendImageJsonPrefix(requestBody, base64Image);
-  requestBody += ",\"group_id\":\"";
-  requestBody += FACE_GROUP_ID;
-  requestBody += "\",\"user_id\":\"";
-  requestBody += new_user_id;
-  requestBody += "\"}";
-
-  HTTPClient http;
-  http.begin(url);
-  http.addHeader("Content-Type", "application/json");
-  int httpCode = http.POST(requestBody);
+  String response;
+  String suffix = "\",\"image_type\":\"BASE64\",\"group_id\":\"";
+  suffix += FACE_GROUP_ID;
+  suffix += "\",\"user_id\":\"";
+  suffix += new_user_id;
+  suffix += "\"}";
+  int httpCode = postBaiduImageJson(url, base64Image, suffix, "register", response);
 
   if (httpCode != 200) {
     logError("FACE", "REGISTER_HTTP_FAILED", String("http=") + httpCode + " user_id=" + new_user_id);
-    http.end();
     if (gender == "male") manCount--;
     else if (gender == "female") womanCount--;
     else if (gender == "unknown") unknownCount--;
     return "";
   }
-
-  String response = http.getString();
-  http.end();
 
   DynamicJsonDocument respDoc(2048);
   DeserializationError err = deserializeJson(respDoc, response);

@@ -63,6 +63,10 @@ extern const char* baidu_secret_key;
 // 这里给音频 HTTP 一个短超时，保证它不会拖住 CAM 拍照、PIR 和门铃状态机。
 #define AUDIO_HTTP_TIMEOUT_MS 2500
 
+// 百度 AI 请求会上传 Base64 图片，数据量比普通传感器消息大得多。
+// 单独设超时，方便远程日志判断是 API 拒绝、网络慢，还是主控卡住。
+#define BAIDU_HTTP_TIMEOUT_MS 10000
+
 // 远程按键测试提示音：
 // 现场同学有时看不到我们的即时文字指令，所以测试固件会通过 reSpeaker
 // 定时播放“请配合测试，请按一下门铃按钮”。这只用于确认 D10/GPIO18
