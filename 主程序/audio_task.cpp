@@ -16,6 +16,7 @@
 #include "AudioTools.h"
 #include "AudioTools/Communication/AudioHttp.h"
 #include "AudioTools/AudioCodecs/CodecMP3Helix.h"
+#include "AudioTools/AudioCodecs/CodecWAV.h"
 
 const int I2S_BCLK = 0;
 const int I2S_LRCK = 1;
@@ -27,8 +28,16 @@ const int I2S_MCLK = 19;
 URLStream urlStream;
 I2SStream i2sStream;
 MP3DecoderHelix mp3Decoder;
+WAVDecoder wavDecoder;
 EncodedAudioStream decoder(&i2sStream, &mp3Decoder);
+EncodedAudioStream wavDecoderStream(&i2sStream, &wavDecoder);
 StreamCopy copier(decoder, urlStream);
+StreamCopy wavCopier(wavDecoderStream, urlStream);
+
+enum AudioCodecKind {
+    AUDIO_CODEC_MP3,
+    AUDIO_CODEC_WAV
+};
 
 bool isPlayingQuarrel = false;
 bool isPlayingDoorbell = false;
@@ -43,6 +52,7 @@ static int nextQuarrelSequenceIndex = 0;
 static const char* pendingAudioUrl = nullptr;
 static bool pendingAudioIsQuarrel = false;
 static bool pendingAudioIsDoorbell = false;
+static AudioCodecKind activeAudioCodec = AUDIO_CODEC_MP3;
 
 static bool startNextQueuedQuarrelTrack();
 
@@ -54,6 +64,7 @@ const char* quarrel_urls[] = {
 const int quarrel_count = 3;
 
 const char doorbell_url[] = "https://raw.githubusercontent.com/toffee33/doorbell-noise-audio/main/noises%20quarrel/door-bell-sound.mp3";
+const char button_test_prompt_url[] = "https://raw.githubusercontent.com/zhangtianhai2017/Xuanxuan/main/test/audio-prompts/please_press_doorbell_button.wav";
 // 如果长时间没有复制到音频数据，就认为一首歌结束或启动失败。
 // 这是网络流的简化判断，适合教学项目，真实产品可换成更严格的 EOF 回调。
 const unsigned long AUDIO_IDLE_ADVANCE_MS = 2500;
@@ -63,12 +74,25 @@ static void stopCurrentAudio() {
     // 关闭当前网络流、解码器和 I2S，避免下一首歌复用旧状态。
     urlStream.end();
     decoder.end();
+    wavDecoderStream.end();
     i2sStream.end();
     audioActive = false;
     audioSawData = false;
     lastAudioDataTime = 0;
     isPlayingQuarrel = false;
     isPlayingDoorbell = false;
+    activeAudioCodec = AUDIO_CODEC_MP3;
+}
+
+static bool urlEndsWith(const char* url, const char* suffix) {
+    // URLStream 只负责下载字节流，真正的解码器要由我们选择。
+    // 现有门铃/吵架声是 MP3，新增加的测试语音是 WAV，所以用后缀区分即可。
+    size_t urlLen = strlen(url);
+    size_t suffixLen = strlen(suffix);
+    if (urlLen < suffixLen) {
+        return false;
+    }
+    return strcasecmp(url + urlLen - suffixLen, suffix) == 0;
 }
 
 static bool queueAudioFromUrl(const char* url, bool isQuarrel, bool isDoorbell) {
@@ -90,6 +114,8 @@ static bool startAudioFromUrl(const char* url) {
     }
 
     stopCurrentAudio();
+    bool useWavDecoder = urlEndsWith(url, ".wav");
+    activeAudioCodec = useWavDecoder ? AUDIO_CODEC_WAV : AUDIO_CODEC_MP3;
 
     auto cfg = i2sStream.defaultConfig(TX_MODE);
     // I2S 引脚必须和硬件接线一致；这些值来自 config.h 中的接线方案。
@@ -102,12 +128,16 @@ static bool startAudioFromUrl(const char* url) {
     cfg.channels = 2;
     i2sStream.begin(cfg);
 
-    decoder.begin();
+    if (useWavDecoder) {
+        wavDecoderStream.begin();
+    } else {
+        decoder.begin();
+    }
     // URLStream.begin() 内部会发起 TCP/TLS/HTTP 请求。弱 WiFi 下它可能阻塞，
     // 所以先设置短超时，并且不等待首包数据，避免音频网络问题拖住门铃/PIR 主流程。
     urlStream.setTimeout(AUDIO_HTTP_TIMEOUT_MS);
     urlStream.setWaitForData(false);
-    bool streamStarted = urlStream.begin(url, "audio/mp3");
+    bool streamStarted = urlStream.begin(url, useWavDecoder ? "audio/wav" : "audio/mp3");
     if (!streamStarted) {
         logError("AUDIO", "PLAY_BEGIN_FAILED",
                  String("timeout_ms=") + AUDIO_HTTP_TIMEOUT_MS
@@ -124,6 +154,7 @@ static bool startAudioFromUrl(const char* url) {
     logInfo("AUDIO", "PLAY_START",
             String("timeout_ms=") + AUDIO_HTTP_TIMEOUT_MS
             + " rssi=" + WiFi.RSSI()
+            + " codec=" + (useWavDecoder ? "wav" : "mp3")
             + " url=" + url);
     return true;
 }
@@ -200,7 +231,7 @@ void audioLoop() {
         return;
     }
 
-    size_t copied = copier.copy();
+    size_t copied = (activeAudioCodec == AUDIO_CODEC_WAV) ? wavCopier.copy() : copier.copy();
     if (copied > 0) {
         audioSawData = true;
         lastAudioDataTime = millis();
@@ -242,6 +273,11 @@ void playAudioFromUrl(const char* url) {
     pendingQuarrelTracks = 0;
     stopCurrentAudio();
     queueAudioFromUrl(url, false, false);
+}
+
+bool isAudioBusy() {
+    // 测试提示音不应该打断门铃声、PIR 威慑音或正在建立的网络音频连接。
+    return audioActive || pendingAudioUrl != nullptr || pendingQuarrelTracks > 0;
 }
 
 void playRandomQuarrel() {
@@ -303,4 +339,20 @@ void playDoorbell() {
     logInfo("AUDIO", "DOORBELL_REQUEST");
     stopCurrentAudio();
     queueAudioFromUrl(doorbell_url, false, true);
+}
+
+void playButtonTestPrompt() {
+    // 远程调试功能：当我们需要现场同学按门铃但日志迟迟没有检测到 GPIO18
+    // 变 LOW 时，播放语音提示。这里不调用 stopCurrentAudio()，避免影响
+    // 正常门铃/PIR 流程；如果音频链路正忙，就跳过本轮提示。
+    if (isAudioBusy()) {
+        logWarn("AUDIO", "BUTTON_TEST_PROMPT_SKIP",
+                String("active=") + (audioActive ? 1 : 0)
+                + " pending_url=" + (pendingAudioUrl != nullptr ? 1 : 0)
+                + " quarrel_pending=" + pendingQuarrelTracks);
+        return;
+    }
+
+    logInfo("AUDIO", "BUTTON_TEST_PROMPT_REQUEST");
+    queueAudioFromUrl(button_test_prompt_url, false, false);
 }

@@ -18,6 +18,8 @@ void playAudioFromUrl(const char* url);
 void playRandomQuarrel();
 void playRandomQuarrelSequence(int trackCount);
 void playDoorbell();
+void playButtonTestPrompt();
+bool isAudioBusy();
 void stopAudio();
 
 #endif

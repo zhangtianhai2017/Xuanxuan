@@ -40,6 +40,11 @@ void handleWiFiReconnect();
 void handleTokenRefresh();
 void handlePIR();
 void handleButton();
+void handleButtonTestPrompt();
+
+// 远程调试时用来确认门铃按键 D10/GPIO18 是否真正接好。
+// 只要还没有在日志里看到一次有效按下，就认为“按键测试未通过”。
+bool doorbellButtonTestPassed = false;
 
 void setup() {
     // Serial 是给电脑串口监视器看的调试日志。
@@ -79,6 +84,7 @@ void loop() {
     audioLoop();
     handleWiFiReconnect();
     handleButton();
+    handleButtonTestPrompt();
     handlePIR();
     handleTokenRefresh();
     delay(10);
@@ -236,6 +242,10 @@ void handleButton() {
         if (currentState == LOW && !buttonTriggered) {
             buttonTriggered = true;
             logInfo("BUTTON", "DOORBELL_PRESSED", "pin=18 state=LOW");
+            if (!doorbellButtonTestPassed) {
+                doorbellButtonTestPassed = true;
+                logInfo("BUTTON", "TEST_PASSED", "pin=18 first_valid_press=1");
+            }
             // 功能需求：访客按门铃后，提示音应立即响应，让现场能先确认按键和音频链路。
             // 拍照/百度识别随后执行；CAM 故障时会使用模拟图，不会阻塞其它测试太久。
             playDoorbell();
@@ -251,4 +261,37 @@ void handleButton() {
     }
 
     lastButtonState = currentState;
+}
+
+void handleButtonTestPrompt() {
+    // 远程调试功能：现场同学未必一直盯着聊天窗口，所以主控可以自己
+    // 通过 reSpeaker 语音提示“请按门铃按钮”。它只用于确认 D10/GPIO18：
+    // 按键一端接 GPIO18，另一端接 GND，按下后 INPUT_PULLUP 会读到 LOW。
+    if (!BUTTON_TEST_PROMPT_ENABLED || doorbellButtonTestPassed) {
+        return;
+    }
+
+    static bool firstPromptSent = false;
+    static unsigned long lastPromptTime = 0;
+    unsigned long now = millis();
+
+    if (!firstPromptSent) {
+        if (now < BUTTON_TEST_PROMPT_START_DELAY_MS) {
+            return;
+        }
+        firstPromptSent = true;
+    } else if (now - lastPromptTime < BUTTON_TEST_PROMPT_INTERVAL_MS) {
+        return;
+    }
+
+    if (digitalRead(PIN_BUTTON) == LOW) {
+        // handleButton() 会在消抖后记录 DOORBELL_PRESSED。这里先不播提示，
+        // 避免用户已经按下时又被提示音打断。
+        return;
+    }
+
+    lastPromptTime = now;
+    logWarn("BUTTON", "TEST_PROMPT_WAITING",
+            String("pin=18 interval_ms=") + BUTTON_TEST_PROMPT_INTERVAL_MS);
+    playButtonTestPrompt();
 }

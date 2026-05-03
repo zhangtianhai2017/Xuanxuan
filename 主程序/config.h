@@ -63,6 +63,14 @@ extern const char* baidu_secret_key;
 // 这里给音频 HTTP 一个短超时，保证它不会拖住 CAM 拍照、PIR 和门铃状态机。
 #define AUDIO_HTTP_TIMEOUT_MS 2500
 
+// 远程按键测试提示音：
+// 现场同学有时看不到我们的即时文字指令，所以测试固件会通过 reSpeaker
+// 定时播放“请配合测试，请按一下门铃按钮”。这只用于确认 D10/GPIO18
+// 的门铃按键接线是否真的能把引脚拉到 GND。
+#define BUTTON_TEST_PROMPT_ENABLED        true
+#define BUTTON_TEST_PROMPT_START_DELAY_MS 5000UL
+#define BUTTON_TEST_PROMPT_INTERVAL_MS    8000UL
+
 // CAM 故障隔离参数，主要服务于异地课堂调试。
 // 临时飞线、供电接触不良或 CAM 未启动时，每次拍照都可能让主控等待很多秒。
 // 进入短暂退避后，PIR、门铃、WiFi、Blynk 和音频还能继续被测试，不会被坏 CAM 拖住。
