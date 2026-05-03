@@ -64,7 +64,7 @@ const char* quarrel_urls[] = {
 const int quarrel_count = 3;
 
 const char doorbell_url[] = "https://raw.githubusercontent.com/toffee33/doorbell-noise-audio/main/noises%20quarrel/door-bell-sound.mp3";
-const char button_test_prompt_url[] = "https://raw.githubusercontent.com/zhangtianhai2017/Xuanxuan/main/test/audio-prompts/please_press_doorbell_button.wav";
+const char button_test_prompt_url[] = "https://raw.githubusercontent.com/zhangtianhai2017/Xuanxuan/main/test/audio-prompts/please_press_doorbell_button_22k.wav";
 // 如果长时间没有复制到音频数据，就认为一首歌结束或启动失败。
 // 这是网络流的简化判断，适合教学项目，真实产品可换成更严格的 EOF 回调。
 const unsigned long AUDIO_IDLE_ADVANCE_MS = 2500;
