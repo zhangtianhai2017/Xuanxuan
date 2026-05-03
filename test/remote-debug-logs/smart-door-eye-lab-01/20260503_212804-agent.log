@@ -904,3 +904,31 @@
 2026-05-03T23:51:31.2337906+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
 2026-05-03T23:51:36.2081443+08:00 [AGENT] serial_auto_detect_failed preferred=COM7 inventory=COM3:蓝牙链接上的标准串行_(COM3),COM4:蓝牙链接上的标准串行_(COM4),COM5:蓝牙链接上的标准串行_(COM5),COM6:蓝牙链接上的标准串行_(COM6)
 2026-05-03T23:51:36.2156716+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T23:51:43.9876273+08:00 [AGENT] serial_auto_detect_failed preferred=COM7 inventory=COM3:蓝牙链接上的标准串行_(COM3),COM4:蓝牙链接上的标准串行_(COM4),COM5:蓝牙链接上的标准串行_(COM5),COM6:蓝牙链接上的标准串行_(COM6)
+2026-05-03T23:51:43.9956210+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T23:51:48.1075146+08:00 [AGENT] serial_auto_detect_failed preferred=COM7 inventory=COM3:蓝牙链接上的标准串行_(COM3),COM4:蓝牙链接上的标准串行_(COM4),COM5:蓝牙链接上的标准串行_(COM5),COM6:蓝牙链接上的标准串行_(COM6)
+2026-05-03T23:51:48.1165160+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T23:51:52.1063425+08:00 [AGENT] serial_auto_detect_failed preferred=COM7 inventory=COM3:蓝牙链接上的标准串行_(COM3),COM4:蓝牙链接上的标准串行_(COM4),COM5:蓝牙链接上的标准串行_(COM5),COM6:蓝牙链接上的标准串行_(COM6)
+2026-05-03T23:51:52.1133422+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T23:51:57.1196177+08:00 [AGENT] serial_auto_detect_failed preferred=COM7 inventory=COM3:蓝牙链接上的标准串行_(COM3),COM4:蓝牙链接上的标准串行_(COM4),COM5:蓝牙链接上的标准串行_(COM5),COM6:蓝牙链接上的标准串行_(COM6)
+2026-05-03T23:51:57.1271369+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T23:52:00.8076042+08:00 [AGENT] serial_auto_detect_failed preferred=COM7 inventory=COM3:蓝牙链接上的标准串行_(COM3),COM4:蓝牙链接上的标准串行_(COM4),COM5:蓝牙链接上的标准串行_(COM5),COM6:蓝牙链接上的标准串行_(COM6)
+2026-05-03T23:52:00.8167300+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T23:52:04.7971254+08:00 [AGENT] serial_auto_detect_failed preferred=COM7 inventory=COM3:蓝牙链接上的标准串行_(COM3),COM4:蓝牙链接上的标准串行_(COM4),COM5:蓝牙链接上的标准串行_(COM5),COM6:蓝牙链接上的标准串行_(COM6)
+2026-05-03T23:52:04.8042843+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T23:52:08.6668483+08:00 [AGENT] serial_auto_detect_failed preferred=COM7 inventory=COM3:蓝牙链接上的标准串行_(COM3),COM4:蓝牙链接上的标准串行_(COM4),COM5:蓝牙链接上的标准串行_(COM5),COM6:蓝牙链接上的标准串行_(COM6)
+2026-05-03T23:52:08.6748471+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T23:52:12.7281057+08:00 [AGENT] serial_auto_detect_failed preferred=COM7 inventory=COM3:蓝牙链接上的标准串行_(COM3),COM4:蓝牙链接上的标准串行_(COM4),COM5:蓝牙链接上的标准串行_(COM5),COM6:蓝牙链接上的标准串行_(COM6)
+2026-05-03T23:52:12.7416278+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T23:52:17.6851693+08:00 [AGENT] serial_auto_detect_failed preferred=COM7 inventory=COM3:蓝牙链接上的标准串行_(COM3),COM4:蓝牙链接上的标准串行_(COM4),COM5:蓝牙链接上的标准串行_(COM5),COM6:蓝牙链接上的标准串行_(COM6)
+2026-05-03T23:52:17.6931688+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T23:52:21.5614244+08:00 [AGENT] serial_auto_detect_failed preferred=COM7 inventory=COM3:蓝牙链接上的标准串行_(COM3),COM4:蓝牙链接上的标准串行_(COM4),COM5:蓝牙链接上的标准串行_(COM5),COM6:蓝牙链接上的标准串行_(COM6)
+2026-05-03T23:52:21.5678325+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T23:52:25.3377294+08:00 [AGENT] serial_auto_detect_failed preferred=COM7 inventory=COM3:蓝牙链接上的标准串行_(COM3),COM4:蓝牙链接上的标准串行_(COM4),COM5:蓝牙链接上的标准串行_(COM5),COM6:蓝牙链接上的标准串行_(COM6)
+2026-05-03T23:52:25.3460815+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T23:52:29.1125551+08:00 [AGENT] serial_auto_detect_failed preferred=COM7 inventory=COM3:蓝牙链接上的标准串行_(COM3),COM4:蓝牙链接上的标准串行_(COM4),COM5:蓝牙链接上的标准串行_(COM5),COM6:蓝牙链接上的标准串行_(COM6)
+2026-05-03T23:52:29.1215562+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T23:52:33.1382680+08:00 [AGENT] serial_auto_detect_failed preferred=COM7 inventory=COM3:蓝牙链接上的标准串行_(COM3),COM4:蓝牙链接上的标准串行_(COM4),COM5:蓝牙链接上的标准串行_(COM5),COM6:蓝牙链接上的标准串行_(COM6)
+2026-05-03T23:52:33.1482693+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T23:52:37.8403588+08:00 [AGENT] serial_auto_detect_failed preferred=COM7 inventory=COM3:蓝牙链接上的标准串行_(COM3),COM4:蓝牙链接上的标准串行_(COM4),COM5:蓝牙链接上的标准串行_(COM5),COM6:蓝牙链接上的标准串行_(COM6)
+2026-05-03T23:52:37.8473649+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
