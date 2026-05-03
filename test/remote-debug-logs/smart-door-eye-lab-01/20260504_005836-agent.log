@@ -3,3 +3,6 @@
 2026-05-04T00:58:43.5845151+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
 2026-05-04T00:59:44.7573000+08:00 [AGENT] git_config_set key=user.name value="Smart Door Eye Remote Agent"
 2026-05-04T00:59:44.8604107+08:00 [AGENT] git_config_set key=user.email value="smart-door-eye-agent@example.invalid"
+2026-05-04T01:41:44.6958780+08:00 [AGENT] command_start id=20260504-013900-flash_main_field_prompt_queue_fix action=flash_main
+2026-05-04T01:42:07.9761756+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T01:42:07.9956416+08:00 [AGENT] command_ok id=20260504-013900-flash_main_field_prompt_queue_fix result=C:\Users\dengw\Documents\XuanXuan-smart-door-eye-20260504_005826\test\remote-debug-logs\smart-door-eye-lab-01\command-results\20260504-013900-flash_main_field_prompt_queue_fix-flash_main.log
