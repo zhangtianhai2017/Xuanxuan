@@ -54,6 +54,8 @@ test/remote-debug-logs/<deviceId>/command-results/
 
 ## 远程刷 XIAO 主控
 
+当前主控固件启用了 GitHub 真人测试图下载，程序体积超过默认 1.2MB APP 分区，因此固件使用 Arduino ESP32 的 `PartitionScheme=huge_app` 编译。远程烧录包里的 `smartdooreye.ino.merged.bin` 已经包含对应分区表，现场同学不需要额外设置。
+
 运行：
 
 ```powershell

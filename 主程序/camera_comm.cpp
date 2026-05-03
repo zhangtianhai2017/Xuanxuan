@@ -27,6 +27,20 @@ static bool cameraLogLineTruncated = false;
 static size_t cameraSkippedBinaryBytes = 0;
 static unsigned int cameraConsecutiveFailures = 0;
 static unsigned long cameraBackoffUntil = 0;
+static bool lastPhotoUsedRemoteTestImage = false;
+
+// These JPEGs are stored in this project Git repository under
+// test/face-test-images/.  They are deliberately small public-domain portraits
+// so their byte size is close to an ESP32-CAM QVGA JPEG, but they still contain
+// real faces for testing the Baidu API path while the camera hardware is down.
+static const char* REMOTE_TEST_IMAGE_URLS[] = {
+    "https://raw.githubusercontent.com/zhangtianhai2017/Xuanxuan/main/test/face-test-images/cornelius_250.jpg",
+    "https://raw.githubusercontent.com/zhangtianhai2017/Xuanxuan/main/test/face-test-images/cleveland_220.jpg",
+    "https://raw.githubusercontent.com/zhangtianhai2017/Xuanxuan/main/test/face-test-images/john_dewey_220.jpg",
+    "https://raw.githubusercontent.com/zhangtianhai2017/Xuanxuan/main/test/face-test-images/small_girl_watts_220.jpg"
+};
+static const size_t REMOTE_TEST_IMAGE_COUNT = sizeof(REMOTE_TEST_IMAGE_URLS) / sizeof(REMOTE_TEST_IMAGE_URLS[0]);
+static size_t nextRemoteTestImageIndex = 0;
 
 // A tiny valid JPEG used only when CAMERA_MOCK_IMAGE_ON_FAILURE is enabled.
 // It is intentionally a plain gray image, not a visitor face.  The purpose is
@@ -123,9 +137,123 @@ static void noteCameraCaptureFailure() {
     }
 }
 
+static bool hasJpegMarkers(const byte* data, size_t size) {
+    return size >= 2
+        && data[0] == 0xFF
+        && data[1] == 0xD8
+        && data[size - 2] == 0xFF
+        && data[size - 1] == 0xD9;
+}
+
+static bool downloadRemoteTestImage(byte** imageBuffer, size_t* imageSize, const char* reason) {
+    if (!CAMERA_REMOTE_TEST_IMAGE_ON_FAILURE) {
+        return false;
+    }
+
+    if (WiFi.status() != WL_CONNECTED) {
+        logWarn("CAM", "REMOTE_TEST_IMAGE_SKIP", "reason=wifi_offline fallback=gray_jpeg");
+        return false;
+    }
+
+    const char* url = REMOTE_TEST_IMAGE_URLS[nextRemoteTestImageIndex];
+    nextRemoteTestImageIndex = (nextRemoteTestImageIndex + 1) % REMOTE_TEST_IMAGE_COUNT;
+
+    HTTPClient http;
+    http.setTimeout(CAMERA_REMOTE_TEST_IMAGE_TIMEOUT_MS);
+    logWarn("CAM", "REMOTE_TEST_IMAGE_FETCH",
+            String("reason=") + reason
+            + " timeout_ms=" + CAMERA_REMOTE_TEST_IMAGE_TIMEOUT_MS
+            + " url=" + url);
+
+    if (!http.begin(url)) {
+        logError("CAM", "REMOTE_TEST_IMAGE_BEGIN_FAILED", String("url=") + url);
+        return false;
+    }
+
+    int httpCode = http.GET();
+    if (httpCode != HTTP_CODE_OK) {
+        logError("CAM", "REMOTE_TEST_IMAGE_HTTP_FAILED",
+                 String("http=") + httpCode + " url=" + url);
+        http.end();
+        return false;
+    }
+
+    int contentLength = http.getSize();
+    int maxBytes = min(CAMERA_REMOTE_TEST_IMAGE_MAX_BYTES, MAX_IMAGE_SIZE);
+    if (contentLength <= 0 || contentLength > maxBytes) {
+        logError("CAM", "REMOTE_TEST_IMAGE_SIZE_INVALID",
+                 String("bytes=") + contentLength
+                 + " max=" + maxBytes
+                 + " url=" + url);
+        http.end();
+        return false;
+    }
+
+    byte* downloaded = new byte[contentLength];
+    if (downloaded == nullptr) {
+        logError("CAM", "REMOTE_TEST_IMAGE_ALLOC_FAILED",
+                 String("bytes=") + contentLength + " free_heap=" + ESP.getFreeHeap());
+        http.end();
+        return false;
+    }
+
+    NetworkClient* stream = http.getStreamPtr();
+    size_t received = 0;
+    unsigned long startMs = millis();
+    unsigned long lastDataMs = startMs;
+    while (received < (size_t)contentLength) {
+        int availableBytes = stream->available();
+        if (availableBytes > 0) {
+            size_t remaining = (size_t)contentLength - received;
+            size_t toRead = min((size_t)availableBytes, remaining);
+            size_t readBytes = stream->readBytes(downloaded + received, toRead);
+            if (readBytes > 0) {
+                received += readBytes;
+                lastDataMs = millis();
+            }
+        }
+
+        if (millis() - lastDataMs > CAMERA_REMOTE_TEST_IMAGE_TIMEOUT_MS) {
+            logError("CAM", "REMOTE_TEST_IMAGE_RX_TIMEOUT",
+                     String("received=") + received
+                     + " expected=" + contentLength
+                     + " elapsed_ms=" + (millis() - startMs));
+            delete[] downloaded;
+            http.end();
+            return false;
+        }
+
+        serviceBackgroundWhileWaiting();
+        delay(1);
+    }
+
+    http.end();
+
+    if (!hasJpegMarkers(downloaded, received)) {
+        logError("CAM", "REMOTE_TEST_IMAGE_MARKER_INVALID",
+                 String("bytes=") + received + " url=" + url);
+        delete[] downloaded;
+        return false;
+    }
+
+    *imageBuffer = downloaded;
+    *imageSize = received;
+    lastPhotoUsedRemoteTestImage = true;
+    logWarn("CAM", "REMOTE_TEST_IMAGE_USED",
+            String("reason=") + reason
+            + " bytes=" + received
+            + " elapsed_ms=" + (millis() - startMs)
+            + " url=" + url);
+    return true;
+}
+
 static bool provideMockImage(byte** imageBuffer, size_t* imageSize, const char* reason) {
     if (!CAMERA_MOCK_IMAGE_ON_FAILURE) {
         return false;
+    }
+
+    if (downloadRemoteTestImage(imageBuffer, imageSize, reason)) {
+        return true;
     }
 
     *imageSize = sizeof(MOCK_JPEG_IMAGE);
@@ -137,6 +265,7 @@ static bool provideMockImage(byte** imageBuffer, size_t* imageSize, const char* 
     }
 
     memcpy(*imageBuffer, MOCK_JPEG_IMAGE, *imageSize);
+    lastPhotoUsedRemoteTestImage = true;
     logWarn("CAM", "MOCK_IMAGE_USED",
             String("reason=") + reason
             + " bytes=" + *imageSize
@@ -514,6 +643,7 @@ bool requestCameraStatus(unsigned long timeout) {
 bool takePhoto(byte** imageBuffer, size_t* imageSize) {
     *imageBuffer = nullptr;
     *imageSize = 0;
+    lastPhotoUsedRemoteTestImage = false;
 
     if (!CAMERA_CAPTURE_ENABLED) {
         logWarn("CAM", "CAPTURE_SKIPPED", "reason=disabled_by_config");
@@ -543,6 +673,7 @@ bool takePhoto(byte** imageBuffer, size_t* imageSize) {
         if (sendCommand(CMD_CAPTURE, RESP_OK, 5000)) {
             if (receiveImageData(imageBuffer, imageSize, 15000)) {
                 logInfo("CAM", "CAPTURE_OK", String("bytes=") + *imageSize + " attempt_ms=" + (millis() - attemptStart));
+                lastPhotoUsedRemoteTestImage = false;
                 noteCameraCaptureSuccess();
                 return true;
             }
@@ -573,7 +704,13 @@ FaceProcessResult takePhotoAndProcess(int photoIndex, bool allowNewRegistration)
 
         if (base64Image.length() > 0) {
             logInfo("PHOTO", "BASE64_OK", String("index=") + photoIndex + " chars=" + base64Image.length());
-            return handleFaceRecognition(base64Image, allowNewRegistration);
+            bool allowRegistrationForThisImage = allowNewRegistration;
+            if (lastPhotoUsedRemoteTestImage && !CAMERA_REMOTE_TEST_IMAGE_ALLOW_REGISTER) {
+                allowRegistrationForThisImage = false;
+                logWarn("FACE", "REGISTER_BLOCKED",
+                        String("reason=remote_test_image index=") + photoIndex);
+            }
+            return handleFaceRecognition(base64Image, allowRegistrationForThisImage);
         } else {
             logError("PHOTO", "BASE64_FAILED", String("index=") + photoIndex);
         }

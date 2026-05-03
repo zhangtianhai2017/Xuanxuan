@@ -33,6 +33,8 @@
 - `scripts/capture_xiao_log.cmd`：采集 XIAO 主控日志。
 - `scripts/capture_cam_usbttl_log.cmd`：单独采集 CAM USB-TTL 日志。
 - `git_upload_config.example.json`：把日志自动放进项目 Git 的测试目录。
+
+主控固件使用 Arduino ESP32 的 `PartitionScheme=huge_app` 编译，因为远程调试版包含更多日志和 GitHub 测试图片下载逻辑。包内的 merged bin 已经带对应分区表，现场只按本指南烧录即可。
 - `remote_agent_config.json`：现场常驻远程调试 Agent 配置。
 - `scripts/run_remote_debug_agent.cmd`：持续看日志、定期 push、接收 Git 远程烧录命令。
 - `现场记录表_请填写.md`：请现场同学填写并发回。

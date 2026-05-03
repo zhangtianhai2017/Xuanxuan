@@ -263,6 +263,19 @@ void playRandomQuarrelSequence(int trackCount) {
         trackCount = quarrel_count;
     }
 
+    bool replacingOldAudio = audioActive || pendingAudioUrl != nullptr || pendingQuarrelTracks > 0;
+    if (replacingOldAudio) {
+        // PIR 可能在上一轮 3 首吵架音还没播完时再次触发。
+        // 这里明确重启一轮新的 3 首序列，避免旧队列和新队列混在一起，导致第一首被覆盖或少播。
+        logWarn("AUDIO", "QUARREL_SEQUENCE_RESTART",
+                String("active=") + (audioActive ? 1 : 0)
+                + " pending_url=" + (pendingAudioUrl != nullptr ? 1 : 0)
+                + " pending_tracks=" + pendingQuarrelTracks);
+        pendingAudioUrl = nullptr;
+        pendingQuarrelTracks = 0;
+        stopCurrentAudio();
+    }
+
     for (int i = 0; i < quarrel_count; i++) {
         quarrelSequence[i] = i;
     }

@@ -68,6 +68,13 @@ extern const char* baidu_secret_key;
 // 进入短暂退避后，PIR、门铃、WiFi、Blynk 和音频还能继续被测试，不会被坏 CAM 拖住。
 #define CAMERA_CAPTURE_ENABLED              true
 #define CAMERA_MOCK_IMAGE_ON_FAILURE        true
+// 远程调试专用：当 ESP32-CAM 还没有修好时，主控可以从本项目 GitHub raw 地址下载小 JPEG。
+// 这些图片放在 test/face-test-images/，尺寸和字节数接近 QVGA 拍照结果，用来验证“图片->Base64->百度 API”链路。
+// 默认不允许把这些公开测试图注册进百度人脸库，避免污染真实访客库。
+#define CAMERA_REMOTE_TEST_IMAGE_ON_FAILURE true
+#define CAMERA_REMOTE_TEST_IMAGE_MAX_BYTES  60000
+#define CAMERA_REMOTE_TEST_IMAGE_TIMEOUT_MS 8000
+#define CAMERA_REMOTE_TEST_IMAGE_ALLOW_REGISTER false
 #define CAMERA_FAILURE_BACKOFF_THRESHOLD    1
 #define CAMERA_FAILURE_BACKOFF_MS           60000UL
 // 远程调试阶段宁可拒绝可疑图片，也不要把坏 JPEG 当成有效访客照片上传。
