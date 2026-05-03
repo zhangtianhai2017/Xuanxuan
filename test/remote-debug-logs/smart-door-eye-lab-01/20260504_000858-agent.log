@@ -350,3 +350,17 @@
 2026-05-04T00:34:53.9759181+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“对端口“COM7”的访问被拒绝。”
 2026-05-04T00:34:57.8589907+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“对端口“COM7”的访问被拒绝。”
 2026-05-04T00:35:02.6671834+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“对端口“COM7”的访问被拒绝。”
+2026-05-04T00:35:10.3186541+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“对端口“COM7”的访问被拒绝。”
+2026-05-04T00:35:14.1361120+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“对端口“COM7”的访问被拒绝。”
+2026-05-04T00:35:17.8804424+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“对端口“COM7”的访问被拒绝。”
+2026-05-04T00:35:23.3192043+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“对端口“COM7”的访问被拒绝。”
+2026-05-04T00:35:27.0985224+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“对端口“COM7”的访问被拒绝。”
+2026-05-04T00:35:30.8896651+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“对端口“COM7”的访问被拒绝。”
+2026-05-04T00:35:34.7593476+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“对端口“COM7”的访问被拒绝。”
+2026-05-04T00:35:38.5937348+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“对端口“COM7”的访问被拒绝。”
+2026-05-04T00:35:43.3693584+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“对端口“COM7”的访问被拒绝。”
+2026-05-04T00:35:47.1086303+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“对端口“COM7”的访问被拒绝。”
+2026-05-04T00:35:51.0087469+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“对端口“COM7”的访问被拒绝。”
+2026-05-04T00:35:54.9440453+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“对端口“COM7”的访问被拒绝。”
+2026-05-04T00:35:58.7864483+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“对端口“COM7”的访问被拒绝。”
+2026-05-04T00:36:03.6128130+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“对端口“COM7”的访问被拒绝。”
