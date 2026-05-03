@@ -821,3 +821,20 @@
 2026-05-04T06:23:40.3874407+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
 "
 2026-05-04T06:23:46.5333936+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T06:23:55.7115605+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T06:24:03.7783038+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T06:24:05.7044897+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T06:24:12.1375047+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T06:24:15.9745881+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T06:24:22.4683528+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T06:24:24.3879209+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T06:24:30.8936812+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T06:24:32.8136201+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T06:24:39.3303539+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T06:24:41.2486084+08:00 [AGENT] serial_read_failed port=COM7 error=Exception calling "ReadLine" with "0" argument(s): "The I/O operation has been aborted because of either a thread exit or an application request.
+"
+2026-05-04T06:24:48.6246023+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
