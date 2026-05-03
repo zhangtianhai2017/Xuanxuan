@@ -7,3 +7,6 @@
 2026-05-03T21:06:12.7507862+08:00 [AGENT] serial_read_failed port=COM7 error=使用“0”个参数调用“ReadLine”时发生异常:“由于线程退出或应用程序请求，已中止 I/O 操作。
 ”
 2026-05-03T21:06:15.8087202+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-03T21:07:09.0673684+08:00 [AGENT] serial_read_failed port=COM7 error=使用“0”个参数调用“ReadLine”时发生异常:“由于线程退出或应用程序请求，已中止 I/O 操作。
+”
+2026-05-03T21:07:11.9402162+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
