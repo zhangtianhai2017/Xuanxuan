@@ -5,3 +5,4 @@
 2026-05-03T19:52:39.9041284+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
 2026-05-03T19:52:39.9081281+08:00 [AGENT] command_failed id=20260503-194705-flash_main_fixed_agent error=
 2026-05-03T20:04:35.3105844+08:00 [AGENT] agent_update_detected action=restart script=C:\Users\dengw\Documents\XuanXuan-smart-door-eye-20260503_193720\release\smart-door-eye-remote-debug-20260502\scripts\remote_debug_agent.ps1
+2026-05-03T20:04:37.9188880+08:00 [AGENT] agent_stop reason=self_update
