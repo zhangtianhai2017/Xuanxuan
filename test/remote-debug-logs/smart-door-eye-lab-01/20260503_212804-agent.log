@@ -970,3 +970,4 @@
 2026-05-03T23:53:58.2947128+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
 2026-05-03T23:54:04.0079571+08:00 [AGENT] serial_auto_detect_failed preferred=COM7 inventory=COM3:蓝牙链接上的标准串行_(COM3),COM4:蓝牙链接上的标准串行_(COM4),COM5:蓝牙链接上的标准串行_(COM5),COM6:蓝牙链接上的标准串行_(COM6)
 2026-05-03T23:54:04.0165834+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T00:08:50.4212280+08:00 [AGENT] agent_update_detected action=restart script=C:\Users\dengw\Documents\XuanXuan-smart-door-eye-20260503_193720\release\smart-door-eye-remote-debug-20260502\scripts\remote_debug_agent.ps1
