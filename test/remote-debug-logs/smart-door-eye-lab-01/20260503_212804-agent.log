@@ -206,3 +206,9 @@
 2026-05-03T22:34:55.8375224+08:00 [AGENT] command_start id=20260503-223500-flash_main_baidu_stream_fix action=flash_main
 2026-05-03T22:35:11.5713041+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
 2026-05-03T22:35:11.5815491+08:00 [AGENT] command_ok id=20260503-223500-flash_main_baidu_stream_fix result=C:\Users\dengw\Documents\XuanXuan-smart-door-eye-20260503_193720\test\remote-debug-logs\smart-door-eye-lab-01\command-results\20260503-223500-flash_main_baidu_stream_fix-flash_main.log
+2026-05-03T22:47:03.8554077+08:00 [AGENT] serial_read_failed port=COM7 error=使用“0”个参数调用“ReadLine”时发生异常:“由于线程退出或应用程序请求，已中止 I/O 操作。
+”
+2026-05-03T22:47:06.5559086+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T22:47:10.1137888+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T22:47:14.7978395+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T22:47:18.3868790+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
