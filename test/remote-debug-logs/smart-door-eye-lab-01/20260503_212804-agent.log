@@ -1,3 +1,15 @@
 ﻿2026-05-03T21:28:04.2175541+08:00 [AGENT] agent_start deviceId=smart-door-eye-lab-01 repoRoot=C:\Users\dengw\Documents\XuanXuan-smart-door-eye-20260503_193720 xiaoPort=AUTO autoDetectXiaoPort=True
 2026-05-03T21:28:05.4586734+08:00 [AGENT] serial_auto_detect preferred=AUTO selected=COM7 inventory=COM3:蓝牙链接上的标准串行_(COM3),COM4:蓝牙链接上的标准串行_(COM4),COM5:蓝牙链接上的标准串行_(COM5),COM6:蓝牙链接上的标准串行_(COM6),COM7:USB_串行设备_(COM7)
 2026-05-03T21:28:05.4705079+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-03T22:05:46.9685432+08:00 [AGENT] serial_read_failed port=COM7 error=使用“0”个参数调用“ReadLine”时发生异常:“由于线程退出或应用程序请求，已中止 I/O 操作。
+”
+2026-05-03T22:05:50.7114063+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T22:05:54.3257196+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T22:05:58.9206837+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T22:06:02.5838874+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T22:06:06.1990442+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T22:06:09.8185587+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T22:06:13.4097643+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T22:06:17.0651409+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T22:06:21.6582815+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
+2026-05-03T22:06:25.3223954+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=使用“0”个参数调用“Open”时发生异常:“端口“COM7”不存在。”
