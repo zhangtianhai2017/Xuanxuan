@@ -3,3 +3,10 @@
 2026-05-04T21:16:01.5834055+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
 2026-05-04T21:17:03.3818236+08:00 [AGENT] git_config_set key=user.name value="Smart Door Eye Remote Agent"
 2026-05-04T21:17:03.5022450+08:00 [AGENT] git_config_set key=user.email value="smart-door-eye-agent@example.invalid"
+2026-05-04T21:36:21.5651660+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "The port 'COM7' does not exist."
+2026-05-04T21:36:30.4785658+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "The port 'COM7' does not exist."
+2026-05-04T21:36:38.0823189+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "The port 'COM7' does not exist."
+2026-05-04T21:36:45.8063027+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "The port 'COM7' does not exist."
+2026-05-04T21:36:54.3926310+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "The port 'COM7' does not exist."
+2026-05-04T21:37:02.1561276+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "The port 'COM7' does not exist."
+2026-05-04T21:37:09.7310815+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "The port 'COM7' does not exist."
