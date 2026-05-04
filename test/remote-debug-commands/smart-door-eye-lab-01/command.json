@@ -1,5 +1,5 @@
 {
-  "id": "20260504-flash-main-audio-minimal-path",
+  "id": "20260504-flash-main-one-boot-prompt",
   "action": "flash_main",
   "firmware": "release/smart-door-eye-remote-debug-20260502/firmware/main_xiao_esp32c6/smartdooreye.ino.merged.bin",
   "erase": true
