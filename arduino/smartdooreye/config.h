@@ -59,9 +59,10 @@ extern const char* baidu_secret_key;
 #define AUDIO_VOLUME        0.7
 #define CAMERA_BAUD_RATE    115200
 #define MAX_IMAGE_SIZE      65536
-// 网络 MP3 来自 GitHub raw，实验室 WiFi 抖动时 connect 可能卡很久。
-// 这里给音频 HTTP 一个短超时，保证它不会拖住 CAM 拍照、PIR 和门铃状态机。
-#define AUDIO_HTTP_TIMEOUT_MS 2500
+// 网络 MP3 来自 GitHub raw。原来验证能响的 AudioTools 写法会等待 HTTP 首包数据；
+// 2.5 秒在现场 WiFi 下太短，容易“PLAY_START 看起来有了，但还没真正写出声音”。
+// 这里改成直接等待到 15 秒超时，简单、可解释，也更接近原先验证过的播放方式。
+#define AUDIO_HTTP_TIMEOUT_MS 15000
 
 // 百度 AI 请求会上传 Base64 图片，数据量比普通传感器消息大得多。
 // 单独设超时，方便远程日志判断是 API 拒绝、网络慢，还是主控卡住。
