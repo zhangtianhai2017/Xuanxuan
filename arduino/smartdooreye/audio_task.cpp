@@ -65,41 +65,10 @@ const int quarrel_count = 3;
 const char doorbell_url[] =
     "https://raw.githubusercontent.com/toffee33/doorbell-noise-audio/main/noise%20quarrel/door-bell-sound.mp3";
 
-static const char* const fieldPromptUrls[FIELD_PROMPT_COUNT] = {
-    "https://raw.githubusercontent.com/zhangtianhai2017/Xuanxuan/main/test/audio-prompts/field-test-guide/00_test_start.mp3",
-    "https://raw.githubusercontent.com/zhangtianhai2017/Xuanxuan/main/test/audio-prompts/field-test-guide/01_speaker_check.mp3",
-    "https://raw.githubusercontent.com/zhangtianhai2017/Xuanxuan/main/test/audio-prompts/field-test-guide/02_press_doorbell.mp3",
-    "https://raw.githubusercontent.com/zhangtianhai2017/Xuanxuan/main/test/audio-prompts/field-test-guide/03_doorbell_not_detected.mp3",
-    "https://raw.githubusercontent.com/zhangtianhai2017/Xuanxuan/main/test/audio-prompts/field-test-guide/04_doorbell_detected.mp3",
-    "https://raw.githubusercontent.com/zhangtianhai2017/Xuanxuan/main/test/audio-prompts/field-test-guide/05_pir_prompt.mp3",
-    "https://raw.githubusercontent.com/zhangtianhai2017/Xuanxuan/main/test/audio-prompts/field-test-guide/06_pir_not_detected.mp3",
-    "https://raw.githubusercontent.com/zhangtianhai2017/Xuanxuan/main/test/audio-prompts/field-test-guide/07_pir_detected.mp3",
-    "https://raw.githubusercontent.com/zhangtianhai2017/Xuanxuan/main/test/audio-prompts/field-test-guide/08_pir_hold_passed.mp3",
-    "https://raw.githubusercontent.com/zhangtianhai2017/Xuanxuan/main/test/audio-prompts/field-test-guide/09_camera_prompt.mp3",
-    "https://raw.githubusercontent.com/zhangtianhai2017/Xuanxuan/main/test/audio-prompts/field-test-guide/10_camera_not_detected.mp3",
-    "https://raw.githubusercontent.com/zhangtianhai2017/Xuanxuan/main/test/audio-prompts/field-test-guide/11_camera_detected.mp3",
-    "https://raw.githubusercontent.com/zhangtianhai2017/Xuanxuan/main/test/audio-prompts/field-test-guide/12_face_prompt.mp3",
-    "https://raw.githubusercontent.com/zhangtianhai2017/Xuanxuan/main/test/audio-prompts/field-test-guide/13_face_ok.mp3",
-    "https://raw.githubusercontent.com/zhangtianhai2017/Xuanxuan/main/test/audio-prompts/field-test-guide/14_test_complete.mp3"
-};
-
-static const char* const fieldPromptIds[FIELD_PROMPT_COUNT] = {
-    "00_test_start",
-    "01_speaker_check",
-    "02_press_doorbell",
-    "03_doorbell_not_detected",
-    "04_doorbell_detected",
-    "05_pir_prompt",
-    "06_pir_not_detected",
-    "07_pir_detected",
-    "08_pir_hold_passed",
-    "09_camera_prompt",
-    "10_camera_not_detected",
-    "11_camera_detected",
-    "12_face_prompt",
-    "13_face_ok",
-    "14_test_complete"
-};
+// 现场调试只保留这一条语音：上电后请现场按一次门铃。
+// 其它分步语音先全部停用，减少远程判断干扰。
+static const char fieldPromptPressDoorbellUrl[] =
+    "https://raw.githubusercontent.com/zhangtianhai2017/Xuanxuan/main/test/audio-prompts/field-test-guide/02_press_doorbell.mp3";
 
 static void closeAudio() {
     urlStream.end();
@@ -263,14 +232,14 @@ void playFieldTestPrompt(FieldTestPrompt prompt) {
     if (!FIELD_TEST_VOICE_GUIDE_ENABLED) {
         return;
     }
-    if (prompt < 0 || prompt >= FIELD_PROMPT_COUNT) {
-        logWarn("AUDIO", "FIELD_PROMPT_INVALID", String("prompt=") + (int)prompt);
+    if (prompt != FIELD_PROMPT_PRESS_DOORBELL) {
+        logInfo("AUDIO", "FIELD_PROMPT_SKIPPED", String("prompt=") + (int)prompt);
         return;
     }
 
     remainingQuarrel = 0;
-    logInfo("AUDIO", "FIELD_PROMPT_REQUEST", String("id=") + fieldPromptIds[prompt]);
-    startAudioFromUrl(fieldPromptUrls[prompt], "field_prompt");
+    logInfo("AUDIO", "FIELD_PROMPT_REQUEST", "id=02_press_doorbell");
+    startAudioFromUrl(fieldPromptPressDoorbellUrl, "field_prompt");
     pumpAudioFor(AUDIO_PRIME_MS);
 }
 

@@ -77,8 +77,9 @@ void setup() {
     loadCounters();
 
     logInfo("BOOT", "READY");
-    playFieldTestPrompt(FIELD_PROMPT_TEST_START);
-    playFieldTestPrompt(FIELD_PROMPT_SPEAKER_CHECK);
+    // 现场远程调试先保持最小流程：上电只说一次“请按门铃”。
+    // 其它自动语音提示全部停用，避免反复播放干扰判断“到底有没有声音”。
+    playFieldTestPrompt(FIELD_PROMPT_PRESS_DOORBELL);
 }
 
 void loop() {
@@ -89,7 +90,6 @@ void loop() {
     audioLoop();
     handleWiFiReconnect();
     handleButton();
-    handleFieldTestPrompts();
     handlePIR();
     handleTokenRefresh();
     delay(10);
@@ -204,7 +204,6 @@ void handlePIR() {
             logInfo("PIR", "MOTION_START", "pin=20 state=HIGH");
             if (!pirMotionTestPassed) {
                 pirMotionTestPassed = true;
-                playFieldTestPrompt(FIELD_PROMPT_PIR_DETECTED);
             }
         } else if (!pirTriggered && (millis() - lastPIRHighTime >= PIR_HOLD_TIME)) {
             pirTriggered = true;
@@ -214,7 +213,6 @@ void handlePIR() {
             playRandomQuarrelSequence(3);
             if (!pirHoldTestPassed) {
                 pirHoldTestPassed = true;
-                playFieldTestPrompt(FIELD_PROMPT_PIR_HOLD_PASSED);
             }
             // 连续拍 3 张：每一张都会走 takePhotoAndProcess()，
             // 即拍照 -> Base64 -> 百度人脸识别。
@@ -263,7 +261,6 @@ void handleButton() {
             // 功能需求：访客按门铃后，提示音应立即响应，让现场能先确认按键和音频链路。
             // 拍照/百度识别随后执行；CAM 故障时会使用模拟图，不会阻塞其它测试太久。
             playDoorbell();
-            playFieldTestPrompt(FIELD_PROMPT_DOORBELL_DETECTED);
             takePhotoAndProcess(0);
 
             // Blynk 通知是辅助功能：如果 Blynk 未连接，包装函数会自动跳过。
@@ -279,65 +276,5 @@ void handleButton() {
 }
 
 void handleFieldTestPrompts() {
-    // 远程现场测试引导：提示音必须短、分段、低优先级。
-    // 每次只播放一个小 MP3，主控只保存提示编号；真正的音频数据由 URLStream 分段下载，
-    // 这样不会把几十 KB 的 MP3 一次性塞进 ESP32-C6 的 RAM。
-    if (!FIELD_TEST_VOICE_GUIDE_ENABLED) {
-        return;
-    }
-
-    static unsigned long lastButtonPromptTime = 0;
-    static unsigned long lastPirPromptTime = 0;
-    static uint8_t buttonPromptStep = 0;
-    static uint8_t pirPromptStep = 0;
-    unsigned long now = millis();
-
-    if (BUTTON_TEST_PROMPT_ENABLED && !doorbellButtonTestPassed) {
-        if (now < BUTTON_TEST_PROMPT_START_DELAY_MS) {
-            return;
-        }
-        if (now - lastButtonPromptTime < BUTTON_TEST_PROMPT_INTERVAL_MS) {
-            return;
-        }
-
-        if (digitalRead(PIN_BUTTON) == LOW) {
-            // handleButton() 会在消抖后记录 DOORBELL_PRESSED。这里先不播提示，
-            // 避免用户已经按下时又被提示音打断。
-            return;
-        }
-
-        lastButtonPromptTime = now;
-        logWarn("BUTTON", "TEST_PROMPT_WAITING",
-                String("pin=18 interval_ms=") + BUTTON_TEST_PROMPT_INTERVAL_MS
-                + " step=" + buttonPromptStep);
-
-        if (buttonPromptStep == 0) {
-            playFieldTestPrompt(FIELD_PROMPT_PRESS_DOORBELL);
-        } else {
-            // 后续轮次交替播放“没测到”和“再按一次”，让现场同学知道不是单纯等待。
-            playFieldTestPrompt((buttonPromptStep % 2) == 1
-                                ? FIELD_PROMPT_DOORBELL_NOT_DETECTED
-                                : FIELD_PROMPT_PRESS_DOORBELL);
-        }
-        buttonPromptStep++;
-        return;
-    }
-
-    if (doorbellButtonTestPassed && !pirMotionTestPassed) {
-        if (doorbellButtonTestPassedAt == 0 || now - doorbellButtonTestPassedAt < FIELD_TEST_NEXT_STEP_DELAY_MS) {
-            return;
-        }
-        if (now - lastPirPromptTime < FIELD_TEST_PROBLEM_INTERVAL_MS) {
-            return;
-        }
-
-        lastPirPromptTime = now;
-        logWarn("PIR", "TEST_PROMPT_WAITING",
-                String("pin=20 interval_ms=") + FIELD_TEST_PROBLEM_INTERVAL_MS
-                + " step=" + pirPromptStep);
-        playFieldTestPrompt((pirPromptStep % 2) == 0
-                            ? FIELD_PROMPT_PIR_PROMPT
-                            : FIELD_PROMPT_PIR_NOT_DETECTED);
-        pirPromptStep++;
-    }
+    // 已停用循环语音引导。当前只在 setup() 上电时播放一次“请按门铃”。
 }
