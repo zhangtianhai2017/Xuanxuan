@@ -164,3 +164,4 @@
 2026-05-04T23:22:28.5875329+08:00 [AGENT] command_start id=20260504-flash-main-audio-minimal-path action=flash_main
 2026-05-04T23:22:50.2306407+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
 2026-05-04T23:22:50.2397487+08:00 [AGENT] command_ok id=20260504-flash-main-audio-minimal-path result=C:\Users\dengw\Documents\XuanXuan-smart-door-eye-20260504_211549\test\remote-debug-logs\smart-door-eye-lab-01\command-results\20260504-flash-main-audio-minimal-path-flash_main.log
+2026-05-04T23:26:00.0883778+08:00 [AGENT] agent_stop
