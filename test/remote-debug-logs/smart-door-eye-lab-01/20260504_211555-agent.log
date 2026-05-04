@@ -158,3 +158,6 @@
 2026-05-04T22:05:33.0220282+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "The port 'COM7' does not exist."
 2026-05-04T22:05:40.4968901+08:00 [AGENT] serial_open_failed port=COM7 attempt=1 error=Exception calling "Open" with "0" argument(s): "The port 'COM7' does not exist."
 2026-05-04T22:05:48.8457836+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T22:33:09.9217417+08:00 [AGENT] command_start id=20260504-flash-main-audio-fix-v2 action=flash_main
+2026-05-04T22:33:33.2523068+08:00 [AGENT] serial_open port=COM7 baud=115200 attempt=1
+2026-05-04T22:33:33.2564057+08:00 [AGENT] command_ok id=20260504-flash-main-audio-fix-v2 result=C:\Users\dengw\Documents\XuanXuan-smart-door-eye-20260504_211549\test\remote-debug-logs\smart-door-eye-lab-01\command-results\20260504-flash-main-audio-fix-v2-flash_main.log
