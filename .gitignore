@@ -18,3 +18,6 @@
 Thumbs.db
 *.tmp
 *.bak
+
+# Stable local Arduino build outputs for scripts/compile_main_native.ps1.
+/.arduino-build/
