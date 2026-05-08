@@ -1,0 +1,1746 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f8f7f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="云门眼">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/png" href="./assets/app-icon.png">
+  <link rel="apple-touch-icon" href="./assets/app-icon.png">
+  <title>云门眼</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f7f8;
+      --surface: #ffffff;
+      --surface-soft: #eef8f5;
+      --ink: #17202a;
+      --muted: #65727f;
+      --line: #d8e1e4;
+      --teal: #0f8f7f;
+      --teal-soft: #dff5ef;
+      --coral: #e85d4f;
+      --amber: #f6b84b;
+      --amber-soft: #fff0cf;
+      --green: #2da66f;
+      --blue: #3778c2;
+      --shadow: 0 18px 45px rgba(26, 43, 57, .14);
+      font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .shell {
+      height: min(100vh, 844px);
+      aspect-ratio: 390 / 844;
+      max-width: 100vw;
+      margin: 0 auto;
+      background: var(--bg);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      box-shadow: 0 0 0 1px rgba(12, 24, 34, .06);
+      overflow: hidden;
+    }
+
+    .statusbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 28px;
+      padding: 0 18px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, .84);
+      font-size: 12px;
+    }
+
+    .appbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      padding: 14px 18px 12px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, .94);
+      backdrop-filter: blur(16px);
+    }
+
+    .appbar-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 22px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .caption {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .online {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--muted);
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #98a2b3;
+    }
+
+    .dot.ok {
+      background: var(--green);
+      box-shadow: 0 0 0 5px rgba(45, 166, 111, .14);
+    }
+
+    .dot.warn {
+      background: var(--amber);
+      box-shadow: 0 0 0 5px rgba(246, 184, 75, .18);
+    }
+
+    .dot.bad {
+      background: var(--coral);
+      box-shadow: 0 0 0 5px rgba(232, 93, 79, .14);
+    }
+
+    main {
+      min-width: 0;
+      padding: 14px 14px 88px;
+      overflow: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    main::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    .notice {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 72px;
+      margin-bottom: 12px;
+      padding: 12px 14px;
+      border: 1px solid #f1c04f;
+      border-radius: 8px;
+      background: var(--amber-soft);
+      color: #633112;
+      box-shadow: var(--shadow);
+      font-weight: 900;
+    }
+
+    .notice.show {
+      display: flex;
+      animation: pulse 900ms ease-in-out 2;
+    }
+
+    @keyframes pulse {
+      50% {
+        transform: scale(1.01);
+      }
+    }
+
+    .photo-card,
+    .primary-card,
+    .card,
+    .event,
+    .visitor {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .photo-card {
+      overflow: hidden;
+    }
+
+    .photo-stage {
+      position: relative;
+      aspect-ratio: 4 / 3;
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, rgba(9, 22, 27, .10), rgba(9, 22, 27, .40)),
+        url("./assets/door-standby.png") center / cover,
+        linear-gradient(135deg, #dce8e7 0%, #cfdcdf 46%, #aebfc4 100%);
+    }
+
+    .photo-stage img,
+    .photo-stage canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .photo-stage.beauty img,
+    .photo-stage.beauty canvas {
+      filter: brightness(1.08) contrast(1.03) saturate(1.10) sepia(.03);
+    }
+
+    .photo-stage.beauty::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 50% 40%, rgba(255, 244, 226, .20), transparent 38%),
+        linear-gradient(180deg, rgba(255, 255, 255, .12), rgba(255, 255, 255, 0) 44%);
+      mix-blend-mode: screen;
+    }
+
+    .tag-row {
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .tag {
+      border-radius: 999px;
+      background: rgba(8, 19, 22, .76);
+      color: #fff;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 900;
+      max-width: 100%;
+    }
+
+    .photo-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 11px 12px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .photo-link {
+      color: var(--blue);
+      text-decoration: none;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .photo-link.hidden {
+      display: none;
+    }
+
+    .primary-card,
+    .card {
+      margin-top: 12px;
+      padding: 14px;
+    }
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 17px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .eyebrow {
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .result {
+      margin-bottom: 7px;
+      font-size: 21px;
+      line-height: 1.2;
+      font-weight: 800;
+      word-break: break-word;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .small {
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .badge {
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .badge.ok {
+      color: #075f55;
+      background: var(--teal-soft);
+    }
+
+    .badge.warn {
+      color: #7a4300;
+      background: var(--amber-soft);
+    }
+
+    .badge.bad {
+      color: #8b1820;
+      background: #ffe1e2;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .metric {
+      min-height: 72px;
+      border: 1px solid rgba(15, 143, 127, .18);
+      border-radius: 8px;
+      background: var(--surface-soft);
+      padding: 10px;
+    }
+
+    .metric b {
+      display: block;
+      margin-top: 5px;
+      font-size: 18px;
+      line-height: 1.2;
+      word-break: break-word;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .btn {
+      min-height: 43px;
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: inline-grid;
+      place-items: center;
+      background: #e7edf0;
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 800;
+    }
+
+    .btn.primary {
+      background: var(--teal);
+      color: #fff;
+    }
+
+    .btn.blue {
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .btn:disabled {
+      opacity: .55;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 16px 0 8px;
+      font-size: 15px;
+      font-weight: 900;
+    }
+
+    .event-list,
+    .visitor-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .event {
+      display: grid;
+      grid-template-columns: 76px 1fr;
+      gap: 10px;
+      align-items: center;
+      padding: 8px;
+      box-shadow: none;
+    }
+
+    .thumb {
+      width: 76px;
+      height: 60px;
+      border-radius: 6px;
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, rgba(10, 24, 30, .10), rgba(10, 24, 30, .28)),
+        url("./assets/door-standby.png") center / cover,
+        linear-gradient(135deg, #dce8e7, #b4c5ca);
+    }
+
+    .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .event h3,
+    .visitor h3 {
+      margin-bottom: 5px;
+      font-size: 15px;
+      line-height: 1.25;
+    }
+
+    .event p,
+    .visitor p {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .seg {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .seg.active {
+      border-color: var(--teal);
+      background: var(--teal-soft);
+      color: #075f55;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .timeline-line {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 8px;
+      align-items: center;
+      min-height: 38px;
+      padding: 0 10px;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+    }
+
+    .timeline-line:last-child {
+      border-bottom: 0;
+    }
+
+    .mark {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--blue);
+    }
+
+    .mark.amber {
+      background: var(--amber);
+    }
+
+    .mark.red {
+      background: var(--coral);
+    }
+
+    .visitor {
+      display: grid;
+      grid-template-columns: 58px 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px;
+      box-shadow: none;
+    }
+
+    .avatar {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 38% 30%, rgba(255, 255, 255, .65), transparent 18%),
+        url("./assets/visitor-avatar.png") center / cover,
+        linear-gradient(135deg, #dfe9e8, #aebfc4);
+      border: 2px solid #fff;
+      box-shadow: 0 0 0 1px var(--line);
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .confidence {
+      min-width: 48px;
+      text-align: right;
+      color: var(--teal);
+      font-size: 15px;
+      font-weight: 900;
+    }
+
+    label {
+      display: block;
+      margin: 12px 0 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 11px;
+      background: #fff;
+      color: var(--ink);
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(55, 120, 194, .14);
+    }
+
+    details {
+      margin-top: 12px;
+    }
+
+    summary {
+      cursor: pointer;
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    pre {
+      max-height: 260px;
+      margin: 10px 0 0;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fafc;
+      color: #334155;
+      padding: 10px;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .empty {
+      padding: 18px;
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .66);
+      color: var(--muted);
+      text-align: center;
+      font-size: 13px;
+    }
+
+    .tabs {
+      z-index: 30;
+      padding: 8px max(10px, env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-right));
+      border-top: 1px solid var(--line);
+      background: rgba(255, 255, 255, .94);
+      backdrop-filter: blur(16px);
+    }
+
+    .tab-inner {
+      width: min(420px, 100%);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .tab {
+      min-height: 44px;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .tab.active {
+      background: var(--teal-soft);
+      color: #075f55;
+    }
+
+    @media (min-width: 700px) {
+      body {
+        display: grid;
+        place-items: center;
+      }
+
+      .shell {
+        border-radius: 24px;
+        border: 1px solid #cfd9dd;
+      }
+    }
+
+    @media (max-aspect-ratio: 390 / 844) {
+      .shell {
+        width: 100vw;
+        height: auto;
+        max-height: 100vh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="statusbar"><span id="clockText">09:41</span><span id="statusText">待机</span></div>
+    <header class="appbar">
+      <div class="appbar-row">
+        <div>
+          <h1 id="screenTitle">门口正在值班</h1>
+          <p class="caption" id="screenCaption">有动静会提醒你</p>
+        </div>
+        <div class="online"><span class="dot" id="liveDot"></span><span id="liveText">连接中</span></div>
+      </div>
+    </header>
+
+    <main>
+      <section class="view active" id="view-home" data-title="门口正在值班" data-caption="有动静会提醒你">
+        <div class="notice" id="eventNotice">
+          <span id="eventNoticeText">门口有新事件</span>
+          <button class="btn" id="dismissNoticeBtn" type="button">知道了</button>
+        </div>
+
+        <article class="photo-card">
+          <div class="photo-stage" id="photoStage">
+            <div class="tag-row">
+              <span class="tag" id="photoTag">门口</span>
+              <span class="tag" id="enhanceTag">清晰</span>
+            </div>
+          </div>
+          <div class="photo-meta">
+            <span id="photoMetaText">门口正在值班</span>
+            <a class="photo-link hidden" id="photoLink" href="#" target="_blank" rel="noreferrer">查看照片</a>
+          </div>
+        </article>
+
+        <article class="primary-card">
+          <div class="card-title">
+            <h2>本次识别</h2>
+            <span class="badge warn" id="faceBadge">等待</span>
+          </div>
+          <p class="result" id="faceResult">门口安静</p>
+          <p class="small muted" id="faceDetail">按门铃、有人经过或手动拍照后会更新。</p>
+
+          <div class="metrics">
+            <div class="metric">
+              <p class="eyebrow">照片保存</p>
+              <b id="metricSave">等待</b>
+            </div>
+            <div class="metric">
+              <p class="eyebrow">本次来源</p>
+              <b id="metricSource">-</b>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn primary" id="captureBtn" type="button">拍一张</button>
+            <button class="btn" id="refreshBtn" type="button">刷新</button>
+          </div>
+        </article>
+
+        <div class="section-title"><span>最近事件</span><span class="small muted" id="recentCount">0 条</span></div>
+        <div class="event-list" id="recentEvents"></div>
+      </section>
+
+      <section class="view" id="view-events" data-title="事件历史" data-caption="每次抓拍都会留下记录">
+        <div class="filters">
+          <button class="seg active" data-filter="all" type="button">全部</button>
+          <button class="seg" data-filter="face" type="button">有人脸</button>
+          <button class="seg" data-filter="doorbell" type="button">门铃</button>
+        </div>
+
+        <div class="event-list" id="allEvents"></div>
+
+        <div class="section-title"><span>本次流程</span><span class="small muted" id="flowStatus">待机</span></div>
+        <div class="timeline" id="flowList">
+          <div class="timeline-line"><span class="mark"></span><span>等待触发</span><b>待机</b></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-visitors" data-title="访客识别" data-caption="熟人和新访客会在这里汇总">
+        <article class="card">
+          <div class="metrics">
+            <div class="metric">
+              <p class="eyebrow">最近访客</p>
+              <b id="metricVisitor">-</b>
+            </div>
+            <div class="metric">
+              <p class="eyebrow">今日入库</p>
+              <b id="metricRegister">0 人</b>
+            </div>
+          </div>
+          <div class="actions">
+            <a class="btn primary" href="https://console.bce.baidu.com/ai-engine/old/#/ai/face/facelib/userList~appId=7628678&groupId=visitors" target="_blank" rel="noreferrer">管理访客</a>
+            <button class="btn" id="enableNotifyBtn" type="button">开启提醒</button>
+          </div>
+        </article>
+
+        <div class="section-title"><span>最近识别</span><span class="small muted" id="visitorCount">0 人</span></div>
+        <div class="visitor-list" id="visitorList"></div>
+
+        <div class="section-title"><span>访客处理</span><span class="small muted" id="visitorActionStatus">待机</span></div>
+        <div class="timeline" id="visitorActions">
+          <div class="timeline-line"><span class="mark"></span><span>等待下一次抓拍</span><b>待机</b></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-settings" data-title="设置" data-caption="连接设备和照片库">
+        <article class="card">
+          <div class="card-title">
+            <h2>连接设置</h2>
+            <span class="badge warn">本机保存</span>
+          </div>
+          <label for="blynkServer">设备服务地址</label>
+          <input id="blynkServer" value="https://sgp1.blynk.cloud">
+
+          <label for="blynkToken">设备凭证</label>
+          <input id="blynkToken" value="TNBHcworOy4Ar1f3NmYQXgFxI6Wsdmir">
+
+          <label for="pollMs">刷新间隔</label>
+          <select id="pollMs">
+            <option value="2000">2 秒</option>
+            <option value="3000">3 秒</option>
+            <option value="5000">5 秒</option>
+          </select>
+
+          <label for="requestPrefix">手动拍照来源标记</label>
+          <input id="requestPrefix" value="web">
+
+          <details>
+            <summary>高级诊断</summary>
+            <label for="githubOwner">照片库账号</label>
+            <input id="githubOwner" value="toffee33">
+
+            <label for="githubRepo">照片库名称</label>
+            <input id="githubRepo" value="smart-door-eye-captures">
+
+            <label for="githubBranch">照片库分支</label>
+            <input id="githubBranch" value="main">
+
+            <label for="githubPath">照片目录</label>
+            <input id="githubPath" value="captures/smartdoor-cam">
+
+            <label for="githubEventsPath">事件目录</label>
+            <input id="githubEventsPath" value="events">
+
+            <div class="actions">
+              <button class="btn" id="loadPhotoBtn" type="button">取最新照片</button>
+              <button class="btn" id="syncEventsBtn" type="button">同步事件</button>
+            </div>
+
+            <pre id="rawText">尚未同步。</pre>
+          </details>
+
+          <div class="actions">
+            <button class="btn primary" id="saveBtn" type="button">保存设置</button>
+            <button class="btn" id="clearBtn" type="button">清空记录</button>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <nav class="tabs" aria-label="主导航">
+      <div class="tab-inner">
+        <button class="tab active" data-view="home" type="button">首页</button>
+        <button class="tab" data-view="events" type="button">事件</button>
+        <button class="tab" data-view="visitors" type="button">访客</button>
+        <button class="tab" data-view="settings" type="button">设置</button>
+      </div>
+    </nav>
+  </div>
+
+  <script>
+    const storageKey = "smart-door-eye-pwa-settings-v2";
+    const eventKey = "smart-door-eye-pwa-events-v2";
+    const statusKey = "smart-door-eye-pwa-device-status-v1";
+    const pins = { request: "V20", result: "V21", heartbeat: "V22" };
+    const BEAUTY_ON_FACE = true;
+    const DISTORTION_CORRECTION = true;
+
+    const state = {
+      timer: null,
+      filter: "all",
+      lastResult: "",
+      lastHeartbeat: "",
+      lastCloudSync: 0,
+      hardwareOnline: null,
+      lastOnlineAt: "",
+      lastOfflineAt: "",
+      currentPhotoUrl: "",
+      currentHasFace: false,
+      events: [],
+      visitors: new Map()
+    };
+
+    const el = (id) => document.getElementById(id);
+
+    function init() {
+      loadSettings();
+      loadEvents();
+      loadDeviceStatus();
+      renderStoredDeviceStatus();
+      bindEvents();
+      renderEvents();
+      updateClock();
+      setInterval(updateClock, 30000);
+      registerServiceWorker();
+      startPolling();
+      fetchLatestPhoto(false).catch(() => {});
+      fetchCloudEvents(false).catch(() => {});
+    }
+
+    function bindEvents() {
+      document.querySelectorAll(".tab").forEach((tab) => {
+        tab.addEventListener("click", () => showView(tab.dataset.view));
+      });
+      document.querySelectorAll(".seg").forEach((seg) => {
+        seg.addEventListener("click", () => {
+          state.filter = seg.dataset.filter;
+          document.querySelectorAll(".seg").forEach((item) => item.classList.toggle("active", item === seg));
+          renderEvents();
+        });
+      });
+      el("dismissNoticeBtn").addEventListener("click", () => el("eventNotice").classList.remove("show"));
+      el("captureBtn").addEventListener("click", triggerSnapshot);
+      el("refreshBtn").addEventListener("click", () => pollDevice(true));
+      el("saveBtn").addEventListener("click", () => {
+        saveSettings();
+        startPolling();
+      });
+      el("clearBtn").addEventListener("click", () => {
+        state.events = [];
+        state.visitors.clear();
+        saveEvents();
+        renderEvents();
+      });
+      el("enableNotifyBtn").addEventListener("click", enableNotifications);
+      el("loadPhotoBtn").addEventListener("click", () => fetchLatestPhoto(true));
+      el("syncEventsBtn").addEventListener("click", () => fetchCloudEvents(true));
+      ["blynkServer", "blynkToken", "pollMs", "requestPrefix", "githubOwner", "githubRepo", "githubBranch", "githubPath", "githubEventsPath"].forEach((id) => {
+        el(id).addEventListener("change", saveSettings);
+      });
+    }
+
+    function showView(name) {
+      document.querySelectorAll(".view").forEach((view) => view.classList.remove("active"));
+      document.querySelectorAll(".tab").forEach((tab) => tab.classList.toggle("active", tab.dataset.view === name));
+      const view = el(`view-${name}`);
+      view.classList.add("active");
+      el("screenTitle").textContent = view.dataset.title || "云门眼";
+      el("screenCaption").textContent = view.dataset.caption || "";
+      renderDeviceCaption();
+    }
+
+    function updateClock() {
+      el("clockText").textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function loadSettings() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(storageKey) || "{}");
+        Object.entries(saved).forEach(([key, value]) => {
+          const input = el(key);
+          if (input && value !== undefined) input.value = value;
+        });
+      } catch (err) {
+        appendDebug(`设置读取失败：${err.message || err}`);
+      }
+    }
+
+    function saveSettings() {
+      const ids = ["blynkServer", "blynkToken", "pollMs", "requestPrefix", "githubOwner", "githubRepo", "githubBranch", "githubPath", "githubEventsPath"];
+      const data = {};
+      ids.forEach((id) => data[id] = el(id).value.trim());
+      localStorage.setItem(storageKey, JSON.stringify(data));
+      setConnection("ok", "已保存");
+    }
+
+    function loadEvents() {
+      try {
+        state.events = JSON.parse(localStorage.getItem(eventKey) || "[]");
+        rebuildVisitors();
+      } catch {
+        state.events = [];
+        state.visitors.clear();
+      }
+    }
+
+    function saveEvents() {
+      localStorage.setItem(eventKey, JSON.stringify(state.events.slice(0, 100)));
+    }
+
+    function loadDeviceStatus() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(statusKey) || "{}");
+        state.lastOnlineAt = saved.lastOnlineAt || "";
+        state.lastOfflineAt = saved.lastOfflineAt || "";
+        if (typeof saved.hardwareOnline === "boolean") state.hardwareOnline = saved.hardwareOnline;
+      } catch {
+        state.hardwareOnline = null;
+      }
+    }
+
+    function saveDeviceStatus() {
+      localStorage.setItem(statusKey, JSON.stringify({
+        hardwareOnline: state.hardwareOnline,
+        lastOnlineAt: state.lastOnlineAt,
+        lastOfflineAt: state.lastOfflineAt
+      }));
+    }
+
+    function renderStoredDeviceStatus() {
+      if (state.hardwareOnline === true) {
+        setConnection("ok", "在线");
+        el("statusText").textContent = "在线";
+      } else if (state.hardwareOnline === false) {
+        setConnection("bad", "离线");
+        el("statusText").textContent = state.lastOfflineAt ? `离线 ${timeLabel(state.lastOfflineAt)}` : "离线";
+      }
+      renderDeviceCaption();
+    }
+
+    function normalizeServer(value) {
+      const raw = (value || "https://sgp1.blynk.cloud").trim().replace(/\/+$/, "");
+      return /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+    }
+
+    function serviceUrl(path, params) {
+      const url = new URL(`${normalizeServer(el("blynkServer").value)}${path}`);
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) url.searchParams.append(key, value);
+      });
+      return url.toString();
+    }
+
+    function getPinsUrl(token, pinList) {
+      const base = serviceUrl("/external/api/get", { token });
+      return `${base}&${pinList.map(encodeURIComponent).join("&")}`;
+    }
+
+    function getHardwareOnlineUrl(token) {
+      return serviceUrl("/external/api/isHardwareConnected", { token });
+    }
+
+    async function fetchText(url) {
+      const response = await fetch(url, { cache: "no-store" });
+      const text = await response.text();
+      if (!response.ok) throw new Error(text || `HTTP ${response.status}`);
+      return text;
+    }
+
+    async function fetchHardwareOnline(token) {
+      const text = (await fetchText(getHardwareOnlineUrl(token))).trim().toLowerCase();
+      if (text === "true" || text === "1") return true;
+      if (text === "false" || text === "0") return false;
+      try {
+        const parsed = JSON.parse(text);
+        if (typeof parsed === "boolean") return parsed;
+        if (typeof parsed.connected === "boolean") return parsed.connected;
+        if (typeof parsed.isHardwareConnected === "boolean") return parsed.isHardwareConnected;
+      } catch {}
+      return null;
+    }
+
+    function startPolling() {
+      if (state.timer) clearInterval(state.timer);
+      pollDevice(false);
+      state.timer = setInterval(() => pollDevice(false), Number(el("pollMs").value || 2000));
+    }
+
+    async function pollDevice(forceRender) {
+      const token = el("blynkToken").value.trim();
+      if (!token) {
+        setConnection("warn", "未连接");
+        return;
+      }
+      try {
+        const [online, text] = await Promise.all([
+          fetchHardwareOnline(token).catch((err) => {
+            appendDebug(`在线状态读取失败：${cleanError(err)}`);
+            return null;
+          }),
+          fetchText(getPinsUrl(token, [pins.result, pins.heartbeat]))
+        ]);
+        const values = parseDeviceValues(text);
+        const result = stringifyValue(values.v21);
+        const heartbeat = stringifyValue(values.v22);
+        state.lastHeartbeat = heartbeat;
+        appendDebug(`识别结果:\n${pretty(result)}\n\n设备状态:\n${pretty(heartbeat)}`, true);
+        updateOnline(heartbeat, online);
+
+        const changed = result && result !== state.lastResult;
+        state.lastResult = result;
+        if (changed || forceRender) {
+          applyResult(result, heartbeat, changed && online !== false);
+        }
+        maybeSyncCloudEvents();
+      } catch (err) {
+        setConnection("bad", "无法同步");
+        el("statusText").textContent = "无法同步";
+        el("screenCaption").textContent = offlineCaption("无法确认设备状态");
+        appendDebug(`同步失败：${cleanError(err)}`);
+      }
+    }
+
+    function parseDeviceValues(text) {
+      const trimmed = (text || "").trim();
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) return { v21: parsed[0] ?? "", v22: parsed[1] ?? "" };
+        return { v21: parsed.v21 ?? parsed.V21 ?? parsed[0] ?? "", v22: parsed.v22 ?? parsed.V22 ?? parsed[1] ?? "" };
+      } catch {
+        const lines = trimmed.split(/\r?\n/);
+        return { v21: lines[0] ?? trimmed, v22: lines[1] ?? "" };
+      }
+    }
+
+    function stringifyValue(value) {
+      return typeof value === "string" ? value : JSON.stringify(value, null, 2);
+    }
+
+    function pretty(value) {
+      if (!value) return "(空)";
+      try {
+        return JSON.stringify(JSON.parse(value), null, 2);
+      } catch {
+        return value;
+      }
+    }
+
+    function parsePairs(value) {
+      const out = {};
+      String(value || "").split(/[;\n\r]+/).forEach((part) => {
+        const index = part.indexOf("=");
+        if (index > 0) out[part.slice(0, index).trim()] = part.slice(index + 1).trim();
+      });
+      return out;
+    }
+
+    function applyResult(result, heartbeat, addHistory) {
+      const kv = parsePairs(result);
+      const hb = parsePairs(heartbeat);
+      const photoUrl = kv.photo_url || kv.photo || "";
+      const faceCount = Number(kv.face ?? kv.face_num ?? -1);
+      const hasFace = faceCount > 0 || !!kv.face_user || kv.face_lib === "registered" || kv.face_lib === "matched";
+      const event = buildEvent(kv, hb, result, heartbeat, photoUrl, hasFace);
+      renderCurrent(event);
+      renderFlow(event);
+
+      if (photoUrl) {
+        showPhoto(photoUrl, hasFace, event.timeText);
+      } else if (!state.currentPhotoUrl) {
+        fetchLatestPhoto(false).catch(() => {});
+      }
+
+      if (addHistory && (photoUrl || kv.req || kv.request)) {
+        pushEvent(event);
+        showNotice(event);
+      }
+    }
+
+    function buildEvent(kv, hb, result, heartbeat, photoUrl, hasFace) {
+      const source = sourceName(kv.req || kv.request || hb.event || "");
+      const ms = Number(kv.ms || hb.ms || 0);
+      const eventTime = ms > 0 ? new Date(Date.now() - Math.max(0, Number(hb.ms || ms) - ms)) : new Date();
+      const now = new Date();
+      return {
+        id: kv.req || kv.request || `${Date.now()}`,
+        time: eventTime.toISOString(),
+        timeText: now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        sortKey: String(Date.now()),
+        source,
+        photoUrl,
+        hasFace,
+        faceUser: kv.face_user || kv.user_id || "",
+        faceLib: kv.face_lib || kv.face_action || "",
+        faceGender: kv.face_gender || "",
+        faceCount: kv.face ?? "",
+        confidence: kv.score || kv.confidence || kv.match_score || "",
+        code: kv.code || kv.error_code || "",
+        http: kv.http || "",
+        msg: kv.msg || kv.error || "",
+        ok: kv.ok === "1" || kv.ok === "true",
+        rawResult: result,
+        rawHeartbeat: heartbeat
+      };
+    }
+
+    function sourceName(request) {
+      const text = String(request || "");
+      if (text.includes("doorbell")) return "门铃";
+      if (text.includes("pir")) return "人体感应";
+      if (text.includes("web") || text.includes("manual")) return "手动";
+      return text ? "远程" : "-";
+    }
+
+    function renderCurrent(event) {
+      const summary = summarize(event);
+      el("faceResult").textContent = summary.title;
+      el("faceDetail").textContent = summary.detail;
+      el("faceBadge").className = `badge ${summary.kind}`;
+      el("faceBadge").textContent = summary.badge;
+      el("metricSave").textContent = event.photoUrl ? "已保存" : "等待";
+      el("metricSource").textContent = event.source;
+      el("metricVisitor").textContent = event.faceUser || (event.hasFace ? "新访客" : "-");
+      updateVisitorMetrics(event);
+    }
+
+    function summarize(event) {
+      if (event.faceUser) {
+        const known = isKnown(event);
+        return {
+          title: event.faceLib === "registered" ? `新访客 ${event.faceUser}` : `${known ? "熟人" : "访客"} ${event.faceUser}`,
+          detail: event.faceLib === "registered" ? "已经加入访客库。" : "已经和访客库记录关联。",
+          badge: event.faceLib === "registered" ? "已入库" : (known ? "熟人" : "有人脸"),
+          kind: "ok"
+        };
+      }
+      if (event.hasFace) {
+        return { title: "检测到访客", detail: "照片已保存，正在整理访客信息。", badge: "有人脸", kind: "ok" };
+      }
+      if (String(event.msg).includes("pic not has face") || event.faceCount === "0") {
+        return { title: "普通抓拍", detail: "门口有一次抓拍记录。", badge: "无脸", kind: "warn" };
+      }
+      if (event.msg || event.code) {
+        return { title: "已抓拍", detail: "照片和识别结果已更新。", badge: "已更新", kind: "warn" };
+      }
+      return { title: "门口安静", detail: "按门铃、有人经过或手动拍照后会更新。", badge: "等待", kind: "warn" };
+    }
+
+    function isKnown(event) {
+      const action = String(event.faceLib || "");
+      if (action === "matched" || action === "match" || action === "searched") return true;
+      if (event.confidence && Number(event.confidence) >= 80) return true;
+      return !!event.faceUser && action !== "registered";
+    }
+
+    function faceLibText(value) {
+      const map = {
+        registered: "新访客",
+        matched: "熟人",
+        match: "熟人",
+        searched: "已关联",
+        search_miss: "未命中",
+        register_failed: "待整理",
+        not_started: "待识别",
+        group_failed: "待整理"
+      };
+      return map[value] || value || "访客";
+    }
+
+    function updateOnline(heartbeat, hardwareOnline) {
+      const hb = parsePairs(heartbeat);
+      const onlineKnown = typeof hardwareOnline === "boolean";
+      const online = onlineKnown ? hardwareOnline : null;
+      const nowIso = new Date().toISOString();
+      const wasOnline = state.hardwareOnline;
+
+      if (online) {
+        state.hardwareOnline = true;
+        state.lastOnlineAt = nowIso;
+        setConnection("ok", "在线");
+        el("statusText").textContent = "在线";
+        el("screenCaption").textContent = hb.ms ? `设备在线 ${Math.floor(Number(hb.ms) / 1000)} 秒` : "设备在线";
+      } else if (online === false) {
+        state.hardwareOnline = false;
+        if (wasOnline !== false || !state.lastOfflineAt) state.lastOfflineAt = nowIso;
+        setConnection("bad", "离线");
+        el("statusText").textContent = `离线 ${timeLabel(state.lastOfflineAt)}`;
+        el("screenCaption").textContent = offlineCaption("设备离线");
+      } else {
+        state.hardwareOnline = null;
+        setConnection("warn", "待确认");
+        el("statusText").textContent = "待确认";
+        renderDeviceCaption();
+      }
+      saveDeviceStatus();
+    }
+
+    function renderDeviceCaption() {
+      if (state.hardwareOnline === false) {
+        el("screenCaption").textContent = offlineCaption("设备离线");
+      } else if (state.hardwareOnline === null && (state.lastOfflineAt || state.lastOnlineAt)) {
+        el("screenCaption").textContent = offlineCaption("设备状态待确认");
+      }
+    }
+
+    function offlineCaption(prefix) {
+      const parts = [prefix];
+      if (state.lastOfflineAt) parts.push(`离线于 ${timeLabel(state.lastOfflineAt)}`);
+      if (state.lastOnlineAt) parts.push(`上次在线 ${timeLabel(state.lastOnlineAt)}`);
+      return parts.join("，");
+    }
+
+    function timeLabel(value) {
+      if (!value) return "";
+      const date = new Date(value);
+      const now = new Date();
+      const sameDay = date.getFullYear() === now.getFullYear()
+        && date.getMonth() === now.getMonth()
+        && date.getDate() === now.getDate();
+      return sameDay
+        ? date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+        : date.toLocaleString([], { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+    }
+
+    function renderFlow(event) {
+      const summary = summarize(event);
+      el("flowStatus").textContent = summary.badge;
+      const photoState = event.photoUrl ? "完成" : "等待";
+      const faceState = event.hasFace ? "有人脸" : (event.faceCount === "0" ? "无脸" : "等待");
+      const visitorState = event.faceUser ? faceLibText(event.faceLib) : (event.hasFace ? "整理中" : "无");
+      el("flowList").innerHTML = `
+        <div class="timeline-line"><span class="mark"></span><span>拍照完成</span><b>${event.source}</b></div>
+        <div class="timeline-line"><span class="mark"></span><span>照片保存</span><b>${photoState}</b></div>
+        <div class="timeline-line"><span class="mark amber"></span><span>人脸识别</span><b>${faceState}</b></div>
+        <div class="timeline-line"><span class="mark ${event.faceUser ? "" : "red"}"></span><span>访客记录</span><b>${visitorState}</b></div>
+      `;
+      renderVisitorActions(event);
+    }
+
+    function pushEvent(event) {
+      if (state.events[0] && state.events[0].id === event.id && state.events[0].photoUrl === event.photoUrl) return;
+      state.events.unshift(event);
+      state.events = state.events.slice(0, 100);
+      noteVisitor(event);
+      updateVisitorMetrics();
+      saveEvents();
+      renderEvents();
+    }
+
+    function mergeEvents(events) {
+      let changed = false;
+      events.forEach((event) => {
+        const index = state.events.findIndex((item) => item.id === event.id || (item.photoUrl && item.photoUrl === event.photoUrl));
+        if (index >= 0) {
+          const current = state.events[index];
+          const merged = { ...current, ...event, photoUrl: event.photoUrl || current.photoUrl };
+          if (JSON.stringify(merged) !== JSON.stringify(current)) {
+            state.events[index] = merged;
+            changed = true;
+          }
+        } else {
+          state.events.push(event);
+          changed = true;
+        }
+      });
+      if (changed) {
+        state.events.sort(compareEvents);
+        state.events = state.events.slice(0, 100);
+        rebuildVisitors();
+        saveEvents();
+        renderEvents();
+        const latest = state.events[0];
+        if (latest) {
+          renderCurrent(latest);
+          renderFlow(latest);
+          if (latest.photoUrl) showPhoto(latest.photoUrl, latest.hasFace, latest.timeText);
+        }
+      }
+    }
+
+    function noteVisitor(event) {
+      if (!event.faceUser) return;
+      state.visitors.set(event.faceUser, {
+        user: event.faceUser,
+        lastTime: event.timeText,
+        faceLib: event.faceLib,
+        photoUrl: event.photoUrl
+      });
+    }
+
+    function rebuildVisitors() {
+      state.visitors.clear();
+      state.events.slice().reverse().forEach((event) => noteVisitor(event));
+      updateVisitorMetrics();
+    }
+
+    function compareEvents(a, b) {
+      const aKey = a.sortKey || a.time || "";
+      const bKey = b.sortKey || b.time || "";
+      return String(bKey).localeCompare(String(aKey));
+    }
+
+    function renderEvents() {
+      renderEventList(el("recentEvents"), state.events.slice(0, 4));
+      const filtered = state.events.filter((event) => {
+        if (state.filter === "face") return event.hasFace || event.faceUser;
+        if (state.filter === "doorbell") return event.source === "门铃";
+        return true;
+      });
+      renderEventList(el("allEvents"), filtered);
+      el("recentCount").textContent = `${state.events.length} 条`;
+      renderVisitors();
+      renderVisitorActions(state.events[0]);
+    }
+
+    function renderEventList(container, events) {
+      if (!events.length) {
+        container.innerHTML = `<div class="empty">门口目前很安静</div>`;
+        return;
+      }
+      container.innerHTML = events.map((event) => {
+        const summary = summarize(event);
+        const img = event.photoUrl ? `<img src="${escapeAttr(event.photoUrl)}" alt="" onerror="this.remove()">` : "";
+        return `
+          <article class="event">
+            <div class="thumb">${img}</div>
+            <div>
+              <h3>${escapeHtml(summary.title)}</h3>
+              <p>${escapeHtml(event.timeText)} · ${escapeHtml(event.source)} · ${escapeHtml(summary.detail)}</p>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function renderVisitors() {
+      const visitors = Array.from(state.visitors.values()).reverse();
+      el("visitorCount").textContent = `${visitors.length} 人`;
+      updateVisitorMetrics();
+      if (!visitors.length) {
+        el("visitorList").innerHTML = `<div class="empty">还没有新的访客</div>`;
+        return;
+      }
+      el("visitorList").innerHTML = visitors.map((item) => `
+        <article class="visitor">
+          <div class="avatar"><img src="${escapeAttr(item.photoUrl || "./assets/visitor-avatar.png")}" alt="" onerror="this.src='./assets/visitor-avatar.png'"></div>
+          <div>
+            <h3>${escapeHtml(item.user)}</h3>
+            <p>${escapeHtml(item.lastTime)} · ${escapeHtml(faceLibText(item.faceLib))}</p>
+          </div>
+          <div class="confidence">${item.faceLib === "registered" ? "新" : "识别"}</div>
+        </article>
+      `).join("");
+    }
+
+    function updateVisitorMetrics(fallbackEvent) {
+      const todayRegistered = state.events.filter((item) => item.faceLib === "registered" && isToday(item.time)).length;
+      const latestVisitor = (fallbackEvent && (fallbackEvent.faceUser || fallbackEvent.hasFace)) ? fallbackEvent : state.events.find((item) => item.faceUser || item.hasFace);
+      el("metricVisitor").textContent = latestVisitor ? (latestVisitor.faceUser || "新访客") : "-";
+      el("metricRegister").textContent = `${todayRegistered} 人`;
+    }
+
+    function renderVisitorActions(event) {
+      if (!event) {
+        el("visitorActionStatus").textContent = "待机";
+        el("visitorActions").innerHTML = `<div class="timeline-line"><span class="mark"></span><span>等待下一次抓拍</span><b>待机</b></div>`;
+        return;
+      }
+      const rows = [];
+      rows.push(["", "照片保存", event.photoUrl ? "完成" : "等待"]);
+      if (event.hasFace || event.faceUser) {
+        rows.push(["amber", "人脸识别", event.faceUser ? "已识别" : "有人脸"]);
+        rows.push(["", event.faceUser ? visitorActionText(event) : "访客信息整理中", event.faceUser ? faceLibText(event.faceLib) : "处理中"]);
+      } else {
+        rows.push(["amber", "本次画面", "普通抓拍"]);
+        rows.push(["", "访客记录", "无新增"]);
+      }
+      el("visitorActionStatus").textContent = rows[rows.length - 1][2];
+      el("visitorActions").innerHTML = rows.map(([mark, text, value]) => `
+        <div class="timeline-line"><span class="mark ${mark}"></span><span>${escapeHtml(text)}</span><b>${escapeHtml(value)}</b></div>
+      `).join("");
+    }
+
+    function visitorActionText(event) {
+      if (event.faceLib === "registered") return `新访客 ${event.faceUser} 已入库`;
+      if (isKnown(event)) return `熟人 ${event.faceUser}`;
+      return `访客 ${event.faceUser}`;
+    }
+
+    function isToday(value) {
+      if (!value) return false;
+      const date = new Date(value);
+      const now = new Date();
+      return date.getFullYear() === now.getFullYear()
+        && date.getMonth() === now.getMonth()
+        && date.getDate() === now.getDate();
+    }
+
+    function showNotice(event) {
+      const summary = summarize(event);
+      const text = `${event.source}：${summary.title}`;
+      el("eventNoticeText").textContent = text;
+      el("eventNotice").classList.add("show");
+      if (window.Notification && Notification.permission === "granted") {
+        new Notification("云门眼", { body: text, icon: "./assets/app-icon.png" });
+      }
+    }
+
+    async function triggerSnapshot() {
+      const token = el("blynkToken").value.trim();
+      if (!token) {
+        setConnection("warn", "未连接");
+        return;
+      }
+      const prefix = el("requestPrefix").value.trim() || "web";
+      const requestId = `${prefix}:ms${Date.now()}:seq${Math.floor(Math.random() * 1000)}`;
+      const url = serviceUrl("/external/api/update", { token, [pins.request]: requestId });
+      el("captureBtn").disabled = true;
+      try {
+        await fetchText(url);
+        setConnection("ok", "已拍照");
+        el("faceResult").textContent = "拍照请求已发送";
+        el("faceDetail").textContent = "请稍等，结果会自动回来。";
+      } catch (err) {
+        setConnection("bad", "失败");
+        appendDebug(`拍照失败：${cleanError(err)}`);
+      } finally {
+        el("captureBtn").disabled = false;
+      }
+    }
+
+    async function enableNotifications() {
+      if (!window.Notification) {
+        setConnection("warn", "不支持提醒");
+        return;
+      }
+      const permission = await Notification.requestPermission();
+      setConnection(permission === "granted" ? "ok" : "warn", permission === "granted" ? "提醒已开" : "未开启");
+    }
+
+    async function fetchLatestPhoto(showError) {
+      const latestEventPhoto = state.events.find((event) => event.photoUrl);
+      if (latestEventPhoto) {
+        showPhoto(latestEventPhoto.photoUrl, latestEventPhoto.hasFace, latestEventPhoto.timeText);
+        return;
+      }
+      const owner = el("githubOwner").value.trim();
+      const repo = el("githubRepo").value.trim();
+      const branch = el("githubBranch").value.trim() || "main";
+      const path = el("githubPath").value.trim().replace(/^\/+|\/+$/g, "");
+      if (!owner || !repo || !path) return;
+      const api = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path}?ref=${encodeURIComponent(branch)}`;
+      try {
+        const response = await fetch(api, { cache: "no-store" });
+        if (!response.ok) throw new Error(`photo list HTTP ${response.status}`);
+        const files = await response.json();
+        const latest = files
+          .filter((file) => /\.(jpe?g|png|webp)$/i.test(file.name))
+          .sort((a, b) => String(b.name).localeCompare(String(a.name)))[0];
+        if (latest) showPhoto(latest.download_url, false, "最近抓拍");
+      } catch (err) {
+        if (showError) appendDebug(`取最新照片失败：${cleanError(err)}`);
+      }
+    }
+
+    function maybeSyncCloudEvents() {
+      const now = Date.now();
+      if (now - state.lastCloudSync < 30000) return;
+      state.lastCloudSync = now;
+      fetchCloudEvents(false).catch(() => {});
+    }
+
+    async function fetchCloudEvents(showError) {
+      state.lastCloudSync = Date.now();
+      const owner = el("githubOwner").value.trim();
+      const repo = el("githubRepo").value.trim();
+      const branch = el("githubBranch").value.trim() || "main";
+      const root = el("githubEventsPath").value.trim().replace(/^\/+|\/+$/g, "");
+      if (!owner || !repo || !root) return;
+      try {
+        const treeUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/git/trees/${encodeURIComponent(branch)}?recursive=1`;
+        const treeResponse = await fetch(treeUrl, { cache: "no-store" });
+        if (!treeResponse.ok) throw new Error(`event list HTTP ${treeResponse.status}`);
+        const tree = await treeResponse.json();
+        const files = (tree.tree || [])
+          .filter((item) => item.type === "blob" && item.path.startsWith(`${root}/`) && /\.json$/i.test(item.path))
+          .sort((a, b) => String(b.path).localeCompare(String(a.path)))
+          .slice(0, 40);
+        const loaded = [];
+        for (const file of files) {
+          const rawUrl = `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodeURIComponent(branch)}/${file.path}`;
+          try {
+            const response = await fetch(rawUrl, { cache: "no-store" });
+            if (!response.ok) continue;
+            loaded.push(normalizeCloudEvent(await response.json(), rawUrl, file.path));
+          } catch (err) {
+            appendDebug(`事件记录读取失败：${file.path} ${cleanError(err)}`);
+          }
+        }
+        mergeEvents(loaded);
+        if (showError) appendDebug(`事件同步完成：${loaded.length} 条`);
+      } catch (err) {
+        if (showError) appendDebug(`事件同步失败：${cleanError(err)}`);
+      }
+    }
+
+    function normalizeCloudEvent(json, rawUrl, path) {
+      const baidu = json.baidu || {};
+      const face = json.face || {};
+      const compact = parsePairs(json.compactResult || json.result || "");
+      const photoUrl = json.photoUrl || json.photo_url || json.photo || compact.photo_url || compact.photo || "";
+      const faceUser = face.userId || face.user_id || json.face_user || compact.face_user || "";
+      const faceLib = face.faceLib || face.face_lib || json.face_lib || compact.face_lib || "";
+      const faceNum = face.faceNum ?? baidu.faceNum ?? json.faceNum ?? compact.face ?? compact.face_num ?? "";
+      const eventTime = json.time || json.timestamp || new Date().toISOString();
+      const pathSort = path.match(/\/(\d+)_/)?.[1] || json.timeMs || eventTime;
+      return {
+        id: json.id || json.request || json.req || path,
+        time: eventTime,
+        timeText: json.timeText || new Date(eventTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        sortKey: String(pathSort).padStart(12, "0"),
+        source: sourceName(json.source || json.request || compact.req || compact.request || path),
+        photoUrl,
+        hasFace: Boolean(faceUser || Number(faceNum) > 0 || json.hasFace),
+        faceUser,
+        faceLib,
+        faceGender: face.gender || compact.face_gender || "",
+        faceCount: faceNum,
+        confidence: face.score || compact.score || compact.confidence || "",
+        code: baidu.errorCode ?? json.code ?? compact.code ?? "",
+        http: json.http || baidu.http || compact.http || "",
+        msg: baidu.message || json.msg || compact.msg || "",
+        ok: json.ok !== false,
+        rawResult: JSON.stringify(json, null, 2),
+        rawHeartbeat: `source=${rawUrl}`
+      };
+    }
+
+    async function showPhoto(url, hasFace, label) {
+      state.currentPhotoUrl = url;
+      state.currentHasFace = hasFace;
+      const stage = el("photoStage");
+      stage.classList.toggle("beauty", !!hasFace && BEAUTY_ON_FACE);
+      el("photoTag").textContent = label || (hasFace ? "有人脸抓拍" : "最新抓拍");
+      el("enhanceTag").textContent = enhanceLabel(hasFace);
+      try {
+        if (DISTORTION_CORRECTION) await drawCorrectedPhoto(url, stage);
+        else await drawPlainPhoto(url, stage);
+        el("metricSave").textContent = "已保存";
+        el("photoMetaText").textContent = "照片已保存";
+        el("photoLink").href = url;
+        el("photoLink").classList.remove("hidden");
+      } catch (err) {
+        stage.querySelectorAll("img, canvas").forEach((node) => node.remove());
+        el("photoTag").textContent = "门口";
+        el("enhanceTag").textContent = "清晰";
+        el("photoMetaText").textContent = "门口正在值班";
+        el("photoLink").classList.add("hidden");
+        appendDebug(`图片无法显示：${url} ${cleanError(err)}`);
+      }
+    }
+
+    function enhanceLabel(hasFace) {
+      const parts = [];
+      if (DISTORTION_CORRECTION) parts.push("清晰");
+      if (hasFace && BEAUTY_ON_FACE) parts.push("自然");
+      return parts.length ? parts.join(" · ") : "原图";
+    }
+
+    function drawCorrectedPhoto(url, stage) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+          const maxW = 720;
+          const scale = Math.min(1, maxW / img.naturalWidth);
+          const width = Math.max(1, Math.round(img.naturalWidth * scale));
+          const height = Math.max(1, Math.round(img.naturalHeight * scale));
+          const source = document.createElement("canvas");
+          source.width = width;
+          source.height = height;
+          const sctx = source.getContext("2d", { willReadFrequently: true });
+          sctx.drawImage(img, 0, 0, width, height);
+          const src = sctx.getImageData(0, 0, width, height);
+          const dst = sctx.createImageData(width, height);
+          correctBarrel(src.data, dst.data, width, height, .18);
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          canvas.getContext("2d").putImageData(dst, 0, 0);
+          stage.querySelectorAll("img, canvas").forEach((node) => node.remove());
+          stage.prepend(canvas);
+          resolve();
+        };
+        img.onerror = reject;
+        img.src = url;
+      });
+    }
+
+    function drawPlainPhoto(url, stage) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.alt = "门口抓拍";
+        img.onload = () => {
+          stage.querySelectorAll("img, canvas").forEach((node) => node.remove());
+          stage.prepend(img);
+          resolve();
+        };
+        img.onerror = reject;
+        img.src = url;
+      });
+    }
+
+    function correctBarrel(src, dst, width, height, strength) {
+      const cx = width / 2;
+      const cy = height / 2;
+      const inv = 1 / Math.min(cx, cy);
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const nx = (x - cx) * inv;
+          const ny = (y - cy) * inv;
+          const r2 = nx * nx + ny * ny;
+          const factor = 1 + strength * r2;
+          const sx = Math.round(cx + (x - cx) * factor);
+          const sy = Math.round(cy + (y - cy) * factor);
+          const di = (y * width + x) * 4;
+          if (sx >= 0 && sx < width && sy >= 0 && sy < height) {
+            const si = (sy * width + sx) * 4;
+            dst[di] = src[si];
+            dst[di + 1] = src[si + 1];
+            dst[di + 2] = src[si + 2];
+            dst[di + 3] = src[si + 3];
+          } else {
+            dst[di] = 15;
+            dst[di + 1] = 28;
+            dst[di + 2] = 32;
+            dst[di + 3] = 255;
+          }
+        }
+      }
+    }
+
+    function setConnection(kind, text) {
+      el("liveDot").className = `dot ${kind || ""}`;
+      el("liveText").textContent = text;
+    }
+
+    function appendDebug(line, replace) {
+      const now = new Date().toLocaleTimeString();
+      el("rawText").textContent = replace ? line : `[${now}] ${line}\n${el("rawText").textContent || ""}`;
+    }
+
+    function cleanError(err) {
+      const text = err && err.message ? err.message : String(err);
+      return text.includes("Failed to fetch") ? "网络请求失败" : text;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#39;"
+      }[char]));
+    }
+
+    function escapeAttr(value) {
+      return escapeHtml(value).replace(/`/g, "&#96;");
+    }
+
+    function registerServiceWorker() {
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("./sw.js").catch(() => {});
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

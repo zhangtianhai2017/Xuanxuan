@@ -1,0 +1,25 @@
+{
+  "name": "云门眼",
+  "short_name": "云门眼",
+  "description": "智能门眼手机端，显示门口抓拍、访客识别和事件提醒。",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f7f8",
+  "theme_color": "#0f8f7f",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/app-icon.png",
+      "sizes": "1254x1254",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
